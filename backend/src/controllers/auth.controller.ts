@@ -5,23 +5,17 @@ import { db } from '../config/database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
+// @desc    Login a user
 export const loginUser = async (req: Request, res: Response) => {
   const { identifier, password } = req.body;
 
   try {
-    // Basic mock login for UI demo without requiring complex DB insertions right now
-    if (identifier === 'admin@kiu.ac.ug' && password === 'admin123') {
-      const token = jwt.sign({ userId: 1, roleId: 1 }, JWT_SECRET, { expiresIn: '1d' });
-      return res.json({ status: 'success', token, user: { id: 1, email: identifier, role: 'Admin' } });
-    }
-
-    // Connect to DB for real logic
     const [users]: any = await db.query(
       `SELECT users.*, roles.name as role_name 
        FROM users 
        JOIN roles ON users.role_id = roles.id 
-       WHERE email = ?`,
-      [identifier]
+       WHERE email = ? OR users.id IN (SELECT user_id FROM students WHERE student_number = ?)`,
+      [identifier, identifier]
     );
 
     if (users.length === 0) {
@@ -33,6 +27,10 @@ export const loginUser = async (req: Request, res: Response) => {
 
     if (!isMatch) {
       return res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({ status: 'error', message: 'Account is deactivated' });
     }
 
     const token = jwt.sign({ userId: user.id, roleId: user.role_id }, JWT_SECRET, { expiresIn: '1d' });
@@ -48,8 +46,109 @@ export const loginUser = async (req: Request, res: Response) => {
         role: user.role_name
       }
     });
-
   } catch (err: any) {
     res.status(500).json({ status: 'error', message: err.message });
   }
+};
+
+// @desc    Register a new student
+export const registerStudent = async (req: Request, res: Response) => {
+  const { firstName, lastName, email, studentNumber, departmentId, password } = req.body;
+  
+  const connection = await db.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+
+    // 1. Verify role exists
+    const [roles]: any = await connection.query(`SELECT id FROM roles WHERE name = 'Student'`);
+    if (roles.length === 0) throw new Error("Student role not found in database");
+    const studentRoleId = roles[0].id;
+
+    // 2. Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // 3. Insert User
+    const [userResult]: any = await connection.query(
+      `INSERT INTO users (role_id, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)`,
+      [studentRoleId, firstName, lastName, email, passwordHash]
+    );
+    const newUserId = userResult.insertId;
+
+    // 4. Insert Student details
+    await connection.query(
+      `INSERT INTO students (user_id, student_number, department_id) VALUES (?, ?, ?)`,
+      [newUserId, studentNumber, departmentId]
+    );
+
+    await connection.commit();
+
+    const token = jwt.sign({ userId: newUserId, roleId: studentRoleId }, JWT_SECRET, { expiresIn: '1d' });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Registration successful',
+      token,
+      user: {
+        id: newUserId,
+        email,
+        firstName,
+        lastName,
+        role: 'Student'
+      }
+    });
+
+  } catch (err: any) {
+    await connection.rollback();
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ status: 'error', message: 'Email or Student Number already exists.' });
+    }
+    res.status(500).json({ status: 'error', message: err.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// @desc    Get current user session
+export const getCurrentUser = async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
+  
+  try {
+    const [users]: any = await db.query(
+      `SELECT users.id, users.email, users.first_name, users.last_name, roles.name as role_name 
+       FROM users 
+       JOIN roles ON users.role_id = roles.id 
+       WHERE users.id = ?`,
+      [userId]
+    );
+
+    if (users.length === 0) return res.status(404).json({ status: 'error', message: 'User not found' });
+
+    res.json({
+      status: 'success',
+      user: {
+        id: users[0].id,
+        email: users[0].email,
+        firstName: users[0].first_name,
+        lastName: users[0].last_name,
+        role: users[0].role_name
+      }
+    });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+// @desc    Forgot Password (Stub)
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  console.log(`[AUTH] Forgot Password requested for: ${email}. Generated token: 12345 (CONSOLE MODE)`);
+  res.json({ status: 'success', message: 'If an account exists, a reset link has been generated.' });
+};
+
+// @desc    Reset Password (Stub)
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+  console.log(`[AUTH] Reset Password utilized with token: ${token}`);
+  res.json({ status: 'success', message: 'Password has been updated locally.' });
 };

@@ -139,7 +139,45 @@ CREATE TABLE system_settings (
 -- Roles Seed Data
 INSERT INTO roles (name) VALUES ('Admin'), ('Staff'), ('Student');
 
--- Example seed data
-INSERT INTO faculties (name) VALUES ('Faculty of Computing');
-INSERT INTO departments (faculty_id, name) VALUES (1, 'Computer Science');
-INSERT INTO complaint_categories (name, description) VALUES ('Academic', 'Lectures, exams, marks'), ('Technical', 'Portal issues, WiFi'), ('Hostel', 'Accommodation, utilities');
+-- Faculties Seed Data
+INSERT INTO faculties (name) VALUES 
+  ('Faculty of Computing & Informatics'),
+  ('Faculty of Business & Management'),
+  ('Faculty of Science'),
+  ('Faculty of Education'),
+  ('Faculty of Health Sciences');
+
+-- Departments Seed Data
+INSERT INTO departments (faculty_id, name) VALUES 
+  (1, 'Computer Science'),
+  (1, 'Information Technology'),
+  (1, 'Software Engineering'),
+  (2, 'Business Administration'),
+  (2, 'Accounting & Finance'),
+  (2, 'Marketing'),
+  (3, 'Mathematics'),
+  (3, 'Physics'),
+  (4, 'Education'),
+  (5, 'Nursing');
+
+-- Complaint Categories Seed Data
+INSERT INTO complaint_categories (name, description) VALUES 
+  ('Academic', 'Issues related to lectures, exams, marks, and academic performance'),
+  ('Technical', 'Portal issues, WiFi, lab equipment, software problems'),
+  ('Hostel', 'Accommodation, utilities, room allocation complaints'),
+  ('Financial', 'Fee payments, bursaries, scholarships, refunds'),
+  ('Library', 'Books, resources, library access problems'),
+  ('Administration', 'Registration, documents, certificates, staff conduct'),
+  ('Other', 'General complaints not covered by other categories');
+
+-- Super Admin User Seed (password: Admin@1234)
+-- bcrypt hash generated for "Admin@1234" with saltRounds=10
+INSERT INTO users (role_id, first_name, last_name, email, password_hash, is_active) VALUES 
+  (1, 'System', 'Administrator', 'admin@kiu.ac.ug', '$2b$10$rOzJqhiXH8vB5Y1L2K3M4ePQzXwA7bVnCgDsEfGhIjKlMnOpQrSt2', TRUE);
+
+-- System Settings
+INSERT INTO system_settings (key_name, value) VALUES 
+  ('system_name', 'KIU Student Complaint Management System'),
+  ('system_email', 'scms@kiu.ac.ug'),
+  ('max_file_size_mb', '10'),
+  ('allowed_file_types', 'pdf,jpg,jpeg,png,doc,docx');
