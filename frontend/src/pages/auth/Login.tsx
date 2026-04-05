@@ -51,8 +51,8 @@ export default function Login() {
               <span>UNIVERSITY</span>
             </div>
           </div>
-          
-          <h2 className="text-2xl font-bold text-gray-900">Student Portal</h2>
+          <h2 className="text-2xl font-bold text-gray-900 text-center uppercase tracking-wide mt-2">SCMS</h2>
+          <p className="text-sm text-gray-500 font-medium tracking-wider">COMPLAINT MANAGEMENT SYSTEM</p>
         </div>
 
         {error && (
@@ -86,14 +86,17 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-[#3dbe6b] hover:bg-primary-600 text-white text-sm font-medium rounded-sm transition-colors"
+            className="w-full py-3 px-4 bg-[#008540] hover:bg-primary-800 text-white text-sm font-medium rounded-sm transition-colors"
           >
-            Next
+            Sign In
           </button>
         </form>
 
-        <div className="mt-8 text-sm text-gray-500 leading-relaxed text-center">
-          Please use your registration number or KIU student email address (e.g. xxxxxx@stdwc.kiu.ac.ug) to login. For assistance please visit ICT office.
+        <div className="mt-8 text-sm text-gray-600 leading-relaxed text-center">
+          <p className="mb-2">Requester / Don't have an account?</p>
+          <button className="text-[#008540] font-semibold hover:underline">
+            Register for SCMS
+          </button>
         </div>
       </div>
     </div>

@@ -1,8 +1,14 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from '../pages/auth/Login';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import StudentProfile from '../pages/dashboard/StudentProfile';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
+
+// Foundational SCMS Pages
+import StudentDashboard from '../pages/dashboard/StudentDashboard';
+import ComplaintsList from '../pages/dashboard/ComplaintsList';
+import NewComplaint from '../pages/dashboard/NewComplaint';
+import AdminDashboard from '../pages/dashboard/AdminDashboard';
+import AdminReports from '../pages/dashboard/AdminReports';
 
 export default function AppRoutes() {
   return (
@@ -16,11 +22,16 @@ export default function AppRoutes() {
           <DashboardLayout />
         </ProtectedRoute>
       }>
-        <Route index element={<StudentProfile />} />
-        <Route path="courses" element={<div className="p-4 text-gray-500">Courses Feature Pending...</div>} />
-        <Route path="results" element={<div className="p-4 text-gray-500">Results Feature Pending...</div>} />
-        <Route path="exams" element={<div className="p-4 text-gray-500">Special Exams Feature Pending...</div>} />
-        <Route path="financial" element={<div className="p-4 text-gray-500">Financial Feature Pending...</div>} />
+        <Route index element={<Navigate to="student" replace />} />
+        
+        {/* Student Routes Foundational Skeleton */}
+        <Route path="student" element={<StudentDashboard />} />
+        <Route path="student/complaints" element={<ComplaintsList />} />
+        <Route path="student/complaints/new" element={<NewComplaint />} />
+
+        {/* Admin Routes Foundational Skeleton */}
+        <Route path="admin" element={<AdminDashboard />} />
+        <Route path="admin/reports" element={<AdminReports />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
