@@ -55,15 +55,32 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-gray-900">Student Portal</h2>
         </div>
 
+        {error && (
+          <div className="mb-4 text-sm text-red-600 bg-red-50 p-2 rounded text-center">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleNext} className="space-y-6">
           <div>
             <input
               type="text"
               required
               value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-sm"
+              onChange={(e) => {
+                setIdentifier(e.target.value);
+                setError('');
+              }}
+              className="w-full px-3 py-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-sm mb-4"
               placeholder="Email or Registration number"
+            />
+            
+            {/* Hidden field for password just to satisfy state logic for demo */}
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="hidden"
             />
           </div>
 
