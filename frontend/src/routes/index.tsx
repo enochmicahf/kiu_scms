@@ -1,19 +1,29 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from '../pages/auth/Login';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import StudentProfile from '../pages/dashboard/StudentProfile';
+import ProtectedRoute from '../components/layout/ProtectedRoute';
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-primary-700">SCMS Platform</h1>
-            <p className="text-gray-600">Student Complaint Management System - Kampala International University</p>
-            <div className="mt-8 flex gap-4 justify-center">
-              <span className="px-4 py-2 bg-white shadow rounded-md">Frontend initialized</span>
-            </div>
-          </div>
-        </div>
-      } />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      
+      {/* Dashboard Routes wrapped in DashboardLayout AND Protected Route */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<StudentProfile />} />
+        <Route path="courses" element={<div className="p-4 text-gray-500">Courses Feature Pending...</div>} />
+        <Route path="results" element={<div className="p-4 text-gray-500">Results Feature Pending...</div>} />
+        <Route path="exams" element={<div className="p-4 text-gray-500">Special Exams Feature Pending...</div>} />
+        <Route path="financial" element={<div className="p-4 text-gray-500">Financial Feature Pending...</div>} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
