@@ -1,15 +1,21 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import path from 'path';
 import { db } from './config/database';
 import v1Routes from './routes/v1';
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploads as static
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health Check
 app.get('/health', async (req, res) => {

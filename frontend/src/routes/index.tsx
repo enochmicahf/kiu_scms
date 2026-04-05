@@ -7,9 +7,11 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 
 // Foundational SCMS Pages
+// Foundational SCMS Pages
 import StudentDashboard from '../pages/dashboard/StudentDashboard';
-import ComplaintsList from '../pages/dashboard/ComplaintsList';
-import NewComplaint from '../pages/dashboard/NewComplaint';
+import ComplaintList from '../pages/complaints/ComplaintList';
+import NewComplaint from '../pages/complaints/NewComplaint';
+import ComplaintDetail from '../pages/complaints/ComplaintDetail';
 import AdminDashboard from '../pages/dashboard/AdminDashboard';
 import AdminReports from '../pages/dashboard/AdminReports';
 
@@ -32,8 +34,9 @@ export default function AppRoutes() {
       }>
         <Route index element={<Navigate to="student" replace />} />
         <Route path="student" element={<StudentDashboard />} />
-        <Route path="student/complaints" element={<ComplaintsList />} />
+        <Route path="student/complaints" element={<ComplaintList />} />
         <Route path="student/complaints/new" element={<NewComplaint />} />
+        <Route path="student/complaints/:id" element={<ComplaintDetail />} />
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/reports" element={<AdminReports />} />
       </Route>

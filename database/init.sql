@@ -67,6 +67,7 @@ CREATE TABLE complaints (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     category_id INT NOT NULL,
+    reference_number VARCHAR(20) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     priority ENUM('Low', 'Medium', 'High', 'Critical') DEFAULT 'Medium',

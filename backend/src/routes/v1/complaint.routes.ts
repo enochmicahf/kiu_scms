@@ -1,33 +1,23 @@
 import { Router } from 'express';
+import { 
+  submitComplaint, 
+  getMyComplaints, 
+  getComplaintById, 
+  getStudentStats,
+  getCategories
+} from '../../controllers/complaint.controller';
+import { requireAuth } from '../../middlewares/auth.middleware';
+import { upload } from '../../middlewares/upload.middleware';
 
 const router = Router();
 
-// @route   POST /api/v1/complaints
-// @desc    Submit a new complaint
-// @access  Private (Student)
-router.post('/', (req, res) => {
-  res.status(501).json({ message: 'Not Implemented: Submit Complaint' });
-});
+// Public/Common routes (Auth required for categories too for security)
+router.get('/categories', requireAuth, getCategories);
 
-// @route   GET /api/v1/complaints
-// @desc    Get complaints for current user
-// @access  Private
-router.get('/', (req, res) => {
-  res.status(501).json({ message: 'Not Implemented: Get Complaints' });
-});
-
-// @route   GET /api/v1/complaints/:id
-// @desc    Get single complaint details
-// @access  Private
-router.get('/:id', (req, res) => {
-  res.status(501).json({ message: 'Not Implemented: Get Complaint Details' });
-});
-
-// @route   PATCH /api/v1/complaints/:id/status
-// @desc    Update complaint status
-// @access  Private (Staff/Admin)
-router.patch('/:id/status', (req, res) => {
-  res.status(501).json({ message: 'Not Implemented: Update Status' });
-});
+// Student routes
+router.post('/', requireAuth, upload.array('attachments', 5), submitComplaint);
+router.get('/', requireAuth, getMyComplaints);
+router.get('/stats', requireAuth, getStudentStats);
+router.get('/:id', requireAuth, getComplaintById);
 
 export default router;

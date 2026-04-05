@@ -1,17 +1,32 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, Bell, LayoutDashboard, FileText, PlusCircle, Settings, Users } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function DashboardLayout() {
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  // In a real app, this navigation would be filtered based on the logged-in user's role
-  const navigation = [
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Filter navigation based on role
+  const isAdmin = user?.role === 'Admin';
+  
+  const navigation = isAdmin ? [
+    { name: 'Admin Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
+    { name: 'Reports Analytics', href: '/dashboard/admin/reports', icon: Settings },
+    { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
+  ] : [
     { name: 'Dashboard', href: '/dashboard/student', icon: LayoutDashboard },
     { name: 'My Complaints', href: '/dashboard/student/complaints', icon: FileText },
     { name: 'Submit Complaint', href: '/dashboard/student/complaints/new', icon: PlusCircle },
-    { name: 'Admin Dashboard', href: '/dashboard/admin', icon: Users },
-    { name: 'Reports Analytics', href: '/dashboard/admin/reports', icon: Settings },
   ];
+
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'User';
+  const userInitials = user ? `${user.firstName[0]}${user.lastName[0]}` : 'U';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -19,11 +34,11 @@ export default function DashboardLayout() {
       <div className="w-64 bg-[#08271c] text-gray-300 flex-shrink-0 flex flex-col">
         {/* User Card */}
         <div className="p-6 flex flex-col items-center border-b border-[#12553a]">
-          <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden mb-3">
-            <img src="https://ui-avatars.com/api/?name=Student+User&background=008540&color=fff" alt="User" />
+          <div className="w-16 h-16 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-xl mb-3 border-2 border-primary-400">
+            {userInitials}
           </div>
-          <h3 className="text-white font-bold text-sm tracking-wide text-center uppercase">Student User</h3>
-          <p className="text-xs text-primary-300 mt-1">Student</p>
+          <h3 className="text-white font-bold text-sm tracking-wide text-center uppercase">{userName}</h3>
+          <p className="text-xs text-primary-300 mt-1">{user?.role || 'User'}</p>
         </div>
 
         {/* Navigation */}
@@ -68,10 +83,10 @@ export default function DashboardLayout() {
               <span className="absolute top-0 right-0 block h-1.5 w-1.5 rounded-full bg-red-400 ring-2 ring-[#008540]" />
             </button>
             <button className="hover:text-white transition-colors">Change password</button>
-            <Link to="/login" className="flex items-center hover:text-white transition-colors font-medium">
+            <button onClick={handleLogout} className="flex items-center hover:text-white transition-colors font-medium">
               Logout
               <LogOut className="h-4 w-4 ml-1.5" />
-            </Link>
+            </button>
           </div>
         </header>
 
