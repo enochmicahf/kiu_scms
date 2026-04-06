@@ -7,6 +7,7 @@ import {
   UserPlus
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../../components/ui/Modal';
@@ -35,12 +36,16 @@ interface Staff {
 
 export default function ComplaintsList() {
   const { user } = useAuth();
+  const location = useLocation();
   const isAdmin = user?.role === 'Admin';
+  const isStaff = user?.role === 'Staff';
+  const isWorklist = location.pathname.includes('/staff/worklist');
   
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [assignedToMe, setAssignedToMe] = useState(isWorklist);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -62,7 +67,9 @@ export default function ComplaintsList() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const params = { search, status, priority, page, limit };
+        const params: any = { search, status, priority, page, limit };
+        if (assignedToMe) params.assignedToMe = 'true';
+        
         const res = await api.get('/admin/complaints', { params });
         setComplaints(res.data.data);
         setTotal(res.data.total);
@@ -74,7 +81,7 @@ export default function ComplaintsList() {
     };
     const timer = setTimeout(fetchData, 300);
     return () => clearTimeout(timer);
-  }, [search, status, priority, page]);
+  }, [search, status, priority, page, assignedToMe]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -129,9 +136,25 @@ export default function ComplaintsList() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">System Grievance Records</h1>
-          <p className="text-gray-500 mt-1 font-medium italic">Administrative view of all institutional complaints.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">
+            {isWorklist ? 'My Resolution Worklist' : 'System Grievance Records'}
+          </h1>
+          <p className="text-gray-500 mt-1 font-medium italic">
+            {isWorklist ? 'Detailed view of cases assigned specifically to you.' : 'Administrative view of all institutional complaints.'}
+          </p>
         </div>
+        {isStaff && !isWorklist && (
+           <button 
+             onClick={() => setAssignedToMe(!assignedToMe)}
+             className={`px-6 py-2 rounded-xl text-xs font-black transition-all ${
+               assignedToMe 
+                 ? 'bg-[#008540] text-white shadow-lg' 
+                 : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+             }`}
+           >
+             {assignedToMe ? 'Showing: My Cases' : 'Show: Assigned to Me'}
+          </button>
+        )}
       </div>
 
       {/* Search and Filters */}
@@ -210,7 +233,12 @@ export default function ComplaintsList() {
                     <p className="text-[10px] text-gray-400 font-bold truncate">Student</p>
                   </td>
                   <td className="px-6 py-5 max-w-[200px]">
-                    <p className="font-bold text-sm text-gray-900 group-hover:text-[#008540] transition-colors truncate">{c.title}</p>
+                    <Link 
+                      to={isStaff ? `/dashboard/staff/complaints/${c.id}` : '#'} 
+                      className={`font-bold text-sm text-gray-900 transition-colors truncate ${isStaff ? 'hover:text-[#008540]' : ''}`}
+                    >
+                      {c.title}
+                    </Link>
                     <p className="text-[10px] text-gray-400 font-bold mt-0.5">{c.category_name}</p>
                   </td>
                   <td className="px-6 py-5">
@@ -250,13 +278,23 @@ export default function ComplaintsList() {
                           <UserPlus className="h-5 w-5" />
                         </button>
                       )}
-                      <button 
-                        onClick={() => { setSelectedComplaint(c); setTargetStatus(c.status); setStatusModalOpen(true); }}
-                        title="Update Status" 
-                        className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                      >
-                        <CheckCircle2 className="h-5 w-5" />
-                      </button>
+                      {isStaff ? (
+                        <Link 
+                          to={`/dashboard/staff/complaints/${c.id}`}
+                          title="Open Workspace" 
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                        >
+                          <CheckCircle2 className="h-5 w-5" />
+                        </Link>
+                      ) : (
+                        <button 
+                          onClick={() => { setSelectedComplaint(c); setTargetStatus(c.status); setStatusModalOpen(true); }}
+                          title="Update Status" 
+                          className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                        >
+                          <CheckCircle2 className="h-5 w-5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

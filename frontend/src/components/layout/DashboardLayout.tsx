@@ -20,8 +20,8 @@ export default function DashboardLayout() {
     { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
     { name: 'Statistics', href: '/dashboard/admin/reports', icon: Settings },
   ] : user?.role === 'Staff' ? [
-    { name: 'Staff Dashboard', href: '/dashboard/admin', icon: LayoutDashboard },
-    { name: 'Assigned Cases', href: '/dashboard/admin/complaints', icon: FileText },
+    { name: 'Staff Dashboard', href: '/dashboard/staff', icon: LayoutDashboard },
+    { name: 'Resolution Center', href: '/dashboard/staff/worklist', icon: FileText },
   ] : [
     { name: 'Dashboard', href: '/dashboard/student', icon: LayoutDashboard },
     { name: 'My Complaints', href: '/dashboard/student/complaints', icon: FileText },

@@ -16,6 +16,8 @@ import AdminDashboard from '../pages/dashboard/AdminDashboard';
 import AdminReports from '../pages/dashboard/AdminReports';
 import ComplaintsList from '../pages/dashboard/ComplaintsList';
 import Users from '../pages/dashboard/Users';
+import StaffDashboard from '../pages/dashboard/StaffDashboard';
+import StaffComplaintWorkspace from '../pages/dashboard/StaffComplaintWorkspace';
 
 export default function AppRoutes() {
   return (
@@ -45,6 +47,11 @@ export default function AppRoutes() {
         <Route path="admin/complaints" element={<ComplaintsList />} />
         <Route path="admin/reports" element={<AdminReports />} />
         <Route path="admin/users" element={<Users />} />
+
+        {/* Staff Specific Routes */}
+        <Route path="staff" element={<StaffDashboard />} />
+        <Route path="staff/worklist" element={<ComplaintsList />} />
+        <Route path="staff/complaints/:id" element={<StaffComplaintWorkspace />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

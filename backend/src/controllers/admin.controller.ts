@@ -13,6 +13,14 @@ export const getAllComplaints = async (req: Request, res: Response) => {
     if (status) { where += ' AND c.status = ?'; params.push(status); }
     if (category) { where += ' AND c.category_id = ?'; params.push(category); }
     if (priority) { where += ' AND c.priority = ?'; params.push(priority); }
+    
+    // Staff filtering: Only show assigned cases if requested or if specific role limits apply
+    const { assignedToMe } = req.query as any;
+    if (assignedToMe === 'true') {
+      where += ' AND c.assigned_staff_id = ?';
+      params.push((req as any).user.userId);
+    }
+
     if (search) { 
       where += ' AND (c.title LIKE ? OR c.reference_number LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)'; 
       params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`); 
@@ -131,27 +139,53 @@ export const updateStatus = async (req: Request, res: Response) => {
   }
 };
 
-// @desc    Get Admin Dashboard Stats
+// @desc    Get Admin/Staff Dashboard Stats
 export const getAdminStats = async (req: Request, res: Response) => {
+  const userId = (req as any).user?.userId;
+  const roleName = (req as any).user?.roleName;
+  const isStaff = roleName === 'Staff';
+
   try {
-    const [total]: any = await db.query('SELECT COUNT(*) as count FROM complaints');
-    const [byStatus]: any = await db.query('SELECT status, COUNT(*) as count FROM complaints GROUP BY status');
-    const [byCategory]: any = await db.query(
-      `SELECT cc.name as category, COUNT(c.id) as count 
-       FROM complaint_categories cc 
-       LEFT JOIN complaints c ON cc.id = c.category_id 
-       GROUP BY cc.name`
-    );
+    let statsQuery = '';
+    let statusQuery = '';
+    let categoryQuery = '';
+    let params: any[] = [];
+
+    if (isStaff) {
+      statsQuery = 'SELECT COUNT(*) as count FROM complaints WHERE assigned_staff_id = ?';
+      statusQuery = 'SELECT status, COUNT(*) as count FROM complaints WHERE assigned_staff_id = ? GROUP BY status';
+      categoryQuery = `SELECT cc.name as category, COUNT(c.id) as count 
+                       FROM complaint_categories cc 
+                       LEFT JOIN complaints c ON cc.id = c.category_id AND c.assigned_staff_id = ?
+                       GROUP BY cc.name`;
+      params = [userId];
+    } else {
+      statsQuery = 'SELECT COUNT(*) as count FROM complaints';
+      statusQuery = 'SELECT status, COUNT(*) as count FROM complaints GROUP BY status';
+      categoryQuery = `SELECT cc.name as category, COUNT(c.id) as count 
+                       FROM complaint_categories cc 
+                       LEFT JOIN complaints c ON cc.id = c.category_id 
+                       GROUP BY cc.name`;
+    }
+
+    const [total]: any = await db.query(statsQuery, params);
+    const [byStatus]: any = await db.query(statusQuery, params);
+    const [byCategory]: any = await db.query(categoryQuery, params);
     const [users]: any = await db.query('SELECT COUNT(*) as count FROM users');
     
-    // Recent activity (last 5 status changes)
-    const [recent]: any = await db.query(
-      `SELECT csh.*, c.reference_number, u.first_name, u.last_name 
-       FROM complaint_status_history csh
-       JOIN complaints c ON csh.complaint_id = c.id
-       JOIN users u ON csh.changed_by_user_id = u.id
-       ORDER BY csh.changed_at DESC LIMIT 5`
-    );
+    // Recent activity (last 5 status changes related to the user if staff)
+    let activityQuery = `SELECT csh.*, c.reference_number, u.first_name, u.last_name 
+                         FROM complaint_status_history csh
+                         JOIN complaints c ON csh.complaint_id = c.id
+                         JOIN users u ON csh.changed_by_user_id = u.id `;
+    
+    if (isStaff) {
+      activityQuery += 'WHERE c.assigned_staff_id = ? OR csh.changed_by_user_id = ? ';
+    }
+    
+    activityQuery += 'ORDER BY csh.changed_at DESC LIMIT 5';
+    
+    const [recent]: any = await db.query(activityQuery, isStaff ? [userId, userId] : []);
 
     res.json({
       status: 'success',
@@ -160,9 +194,52 @@ export const getAdminStats = async (req: Request, res: Response) => {
         byStatus,
         byCategory,
         totalUsers: users[0].count,
-        recentActivity: recent
+        recentActivity: recent,
+        isStaffSpecific: isStaff
       }
     });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+// @desc    Add internal note to a complaint
+export const addInternalNote = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { note } = req.body;
+  const userId = (req as any).user?.userId;
+
+  if (!note) {
+    return res.status(400).json({ status: 'error', message: 'Note content is required' });
+  }
+
+  try {
+    await db.query(
+      'INSERT INTO complaint_internal_notes (complaint_id, user_id, note) VALUES (?, ?, ?)',
+      [id, userId, note]
+    );
+
+    res.json({ status: 'success', message: 'Internal note added' });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+// @desc    Get internal notes for a complaint
+export const getInternalNotes = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const [rows]: any = await db.query(
+      `SELECT cin.*, u.first_name, u.last_name 
+       FROM complaint_internal_notes cin
+       JOIN users u ON cin.user_id = u.id
+       WHERE cin.complaint_id = ?
+       ORDER BY cin.created_at DESC`,
+      [id]
+    );
+
+    res.json({ status: 'success', data: rows });
   } catch (err: any) {
     res.status(500).json({ status: 'error', message: err.message });
   }

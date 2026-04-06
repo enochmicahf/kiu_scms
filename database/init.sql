@@ -100,6 +100,16 @@ CREATE TABLE complaint_status_history (
     FOREIGN KEY (changed_by_user_id) REFERENCES users(id)
 );
 
+CREATE TABLE complaint_internal_notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    complaint_id INT NOT NULL,
+    user_id INT NOT NULL,
+    note TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (complaint_id) REFERENCES complaints(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
