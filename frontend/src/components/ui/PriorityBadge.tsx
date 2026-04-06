@@ -1,4 +1,3 @@
-import { AlertCircle } from 'lucide-react';
 
 export function PriorityBadge({ priority }: { priority: string }) {
   const getStyles = () => {
