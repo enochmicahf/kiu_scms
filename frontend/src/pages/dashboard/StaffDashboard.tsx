@@ -3,14 +3,12 @@ import {
   FileText, 
   Clock, 
   CheckCircle2, 
-  AlertCircle,
   TrendingUp,
-  User,
   ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
-import { Skeleton, CardSkeleton } from '../../components/ui/Skeleton';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 
 interface DashboardStats {
   total: number;

@@ -7,8 +7,6 @@ import {
   AlertCircle, 
   FileText, 
   Download, 
-  User, 
-  Calendar,
   MessageSquare,
   Copy,
   Check,
