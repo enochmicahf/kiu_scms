@@ -47,9 +47,14 @@ export function TableRow({ children, className = '' }: { children: React.ReactNo
   );
 }
 
-export function TableCell({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+export function TableCell({ children, className = '', ...props }: TableCellProps) {
   return (
-    <td className={`px-8 py-5 whitespace-nowrap group-hover:text-slate-900 transition-colors ${className}`}>
+    <td className={`px-8 py-5 whitespace-nowrap group-hover:text-slate-900 transition-colors ${className}`} {...props}>
       {children}
     </td>
   );

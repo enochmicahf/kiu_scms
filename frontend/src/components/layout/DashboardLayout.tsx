@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Settings, Users, Building2, ShieldAlert, BarChart3, ClipboardList, Menu, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Settings, Users, Building2, ShieldAlert, BarChart3, ClipboardList, Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import NotificationCenter from './NotificationCenter';
 import ProfileDropdown from './ProfileDropdown';

@@ -6,7 +6,6 @@ import * as z from 'zod';
 import { 
   FileText,
   X, 
-  AlertCircle,
   CheckCircle2,
   ChevronLeft,
   Loader2,
