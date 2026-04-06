@@ -44,6 +44,8 @@ services:
       DB_USER: ${DB_USER:-kiu_user}
       DB_PASSWORD: ${DB_PASSWORD:-kiupass!123}
       JWT_SECRET: ${JWT_SECRET:-PROD_SECURE_TOKEN_REPLACE_ME}
+    volumes:
+      - ./backend/uploads:/app/uploads
     depends_on:
       - db
     networks:
