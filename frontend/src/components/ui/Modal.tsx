@@ -27,31 +27,34 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 transition-all animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 transition-all animate-in fade-in duration-500">
       <div 
-        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" 
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100">
+      <div className="relative bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-500 border border-white/20">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
-          <h3 className="text-lg font-black text-gray-900 tracking-tight uppercase tracking-widest">{title}</h3>
+        <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+          <div>
+             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] leading-none mb-2 block">Case Inspector</span>
+             <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">{title}</h3>
+          </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-900"
+            className="p-3 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all text-slate-400 hover:text-slate-900 active:scale-95"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[70vh]">
+        <div className="px-10 py-8 overflow-y-auto max-h-[60vh] custom-scrollbar">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/20 flex justify-end gap-3">
+          <div className="px-10 py-8 border-t border-slate-50 bg-slate-50/50 flex justify-end gap-3">
             {footer}
           </div>
         )}
