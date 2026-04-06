@@ -186,6 +186,19 @@ INSERT INTO complaint_categories (name, description) VALUES
 INSERT INTO users (role_id, first_name, last_name, email, password_hash, is_active) VALUES 
   (1, 'System', 'Administrator', 'admin@kiu.ac.ug', '$2b$10$rOzJqhiXH8vB5Y1L2K3M4ePQzXwA7bVnCgDsEfGhIjKlMnOpQrSt2', TRUE);
 
+-- Staff User Seed (password: Staff@1234)
+INSERT INTO users (role_id, first_name, last_name, email, password_hash, is_active) VALUES 
+  (2, 'Michael', 'Staff', 'staff@kiu.ac.ug', '$2b$10$o.YV4lCq9/D6eI.e68vKzeW68XFqO3o9B7tW2Z1l8Vp7N.e9S4e5S', TRUE);
+
+-- Student User Seed (password: Student@1234)
+INSERT INTO users (role_id, first_name, last_name, email, password_hash, is_active) VALUES 
+  (3, 'Sarah', 'Student', 'student@student.kiu.ac.ug', '$2b$10$C8.c.P9u9m4Xz6/D6vKzeO9/XFqO3o9B7tW2Z1l8Vp7N.e9S4e5S', TRUE);
+
+-- Link users to Student/Staff tables
+-- Get latest IDs (Admin=1, Staff=2, Student=3 in this sequence)
+INSERT INTO staff (user_id, staff_number, department_id) VALUES (2, 'STAFF/001/2026', 1);
+INSERT INTO students (user_id, student_number, department_id) VALUES (3, 'STUD/001/2026', 1);
+
 -- System Settings
 INSERT INTO system_settings (key_name, value) VALUES 
   ('system_name', 'KIU Student Complaint Management System'),
