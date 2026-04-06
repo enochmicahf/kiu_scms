@@ -16,6 +16,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import api from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 const complaintSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters').max(200),
@@ -31,8 +32,8 @@ export default function NewComplaint() {
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const toast = useToast();
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<ComplaintFormData>({
     resolver: zodResolver(complaintSchema),
@@ -59,11 +60,10 @@ export default function NewComplaint() {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       if (files.length + newFiles.length > 5) {
-        setError('Maximum 5 files allowed');
+        toast.error('Maximum 5 files allowed');
         return;
       }
       setFiles([...files, ...newFiles]);
-      setError('');
     }
   };
 
@@ -73,7 +73,6 @@ export default function NewComplaint() {
 
   const onSubmit = async (data: ComplaintFormData) => {
     setIsSubmitting(true);
-    setError('');
     
     try {
       const formData = new FormData();
@@ -92,10 +91,11 @@ export default function NewComplaint() {
         },
       });
 
+      toast.success('Grievance logged successfully.');
       setSuccess(true);
       setTimeout(() => navigate('/dashboard/student/complaints'), 2500);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to submit complaint. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to submit grievance. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -151,12 +151,6 @@ export default function NewComplaint() {
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400" />
         
         <form onSubmit={handleSubmit(onSubmit)} className="p-10 lg:p-14 space-y-10">
-          {error && (
-            <div className="bg-red-50 border border-red-100 p-6 rounded-2xl flex items-center gap-4 animate-shake">
-              <AlertCircle className="h-6 w-6 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm font-bold">{error}</p>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-3">

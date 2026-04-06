@@ -72,14 +72,14 @@ export default function ComplaintList() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Grievance Records</h1>
-          <p className="text-gray-500 mt-1 font-medium">Manage and track your submitted complaints.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Grievance Records</h1>
+          <p className="text-slate-500 mt-2 font-medium">Manage and track your submitted complaints.</p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-white p-6 rounded-[2rem] border border-slate-100/60 shadow-sm flex flex-col xl:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full text-gray-800">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -87,17 +87,17 @@ export default function ComplaintList() {
             placeholder="Search by reference or subject..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm font-medium"
+            className="premium-input pl-12 pr-4 bg-slate-50"
           />
         </div>
         
-        <div className="flex gap-4 w-full md:w-auto">
-          <div className="relative flex-1 md:w-44 text-gray-800">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="flex gap-4 w-full xl:w-auto">
+          <div className="relative flex-1 xl:w-48 text-slate-800">
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <select
               value={statusFilter}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm appearance-none font-bold"
+              className="premium-input pl-11 pr-8 bg-slate-50 appearance-none font-bold"
             >
               <option value="">All Statuses</option>
               <option value="Submitted">Submitted</option>
@@ -107,12 +107,12 @@ export default function ComplaintList() {
             </select>
           </div>
 
-          <div className="relative flex-1 md:w-52 text-gray-800">
-            <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="relative flex-1 md:w-52 text-slate-800">
+            <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <select
               value={categoryFilter}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategoryFilter(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all text-sm appearance-none font-bold"
+              className="premium-input pl-11 pr-8 bg-slate-50 appearance-none font-bold"
             >
               <option value="">All Categories</option>
               {categories.map((cat: any) => (
@@ -123,10 +123,10 @@ export default function ComplaintList() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+      <div className="bg-white rounded-[2rem] border border-slate-100/60 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
         <div className="flex-1">
           {loading ? (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-slate-50 border-b border-slate-50">
               <TableRowSkeleton />
               <TableRowSkeleton />
               <TableRowSkeleton />
@@ -145,36 +145,38 @@ export default function ComplaintList() {
               </button>
             </div>
           ) : complaints.length > 0 ? (
-            <div className="divide-y divide-gray-50 text-gray-800">
+            <div className="divide-y divide-slate-50/80 text-slate-800 border-b border-slate-50">
               {complaints.map((complaint) => (
                 <Link
                   key={complaint.id}
                   to={`/dashboard/student/complaints/${complaint.id}`}
-                  className="block hover:bg-gray-50/50 transition-all p-6 group"
+                  className="block hover:bg-slate-50/50 hover:-translate-y-[1px] hover:shadow-md hover:shadow-slate-200/20 transition-all p-6 md:p-8 lg:p-10 group bg-white border-b border-transparent relative z-10"
                 >
                   <div className="flex items-start justify-between gap-6">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-[10px] font-black text-gray-700 bg-gray-100 px-2 py-1 rounded tracking-[0.1em] uppercase">
+                    <div className="flex-1 space-y-4">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-[10px] md:text-xs font-black text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg tracking-widest uppercase">
                           {complaint.reference_number}
                         </span>
-                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${getStatusStyle(complaint.status)}`}>
+                        <span className={`px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest ${getStatusStyle(complaint.status)}`}>
                           {complaint.status}
                         </span>
                       </div>
-                      <h3 className="font-bold text-gray-900 leading-tight group-hover:text-[#008540] transition-colors text-lg">{complaint.title}</h3>
-                      <div className="flex items-center text-xs text-gray-500 space-x-8 font-medium">
-                        <span className="flex items-center"><FileText className="h-3.5 w-3.5 mr-1.5 opacity-60" /> {complaint.category_name}</span>
-                        <span className="flex items-center"><Calendar className="h-3.5 w-3.5 mr-1.5 opacity-60" /> {new Date(complaint.created_at).toLocaleDateString()}</span>
+                      <h3 className="font-black text-slate-900 leading-tight group-hover:text-[#008540] transition-colors text-xl md:text-2xl tracking-tight">{complaint.title}</h3>
+                      <div className="flex flex-wrap items-center text-xs text-slate-500 gap-x-8 gap-y-3 font-bold">
+                        <span className="flex items-center"><FileText className="h-4 w-4 mr-2" /> {complaint.category_name}</span>
+                        <span className="flex items-center"><Calendar className="h-4 w-4 mr-2" /> {new Date(complaint.created_at).toLocaleDateString()}</span>
                         <span className={`flex items-center ${
-                          complaint.priority === 'Critical' ? 'text-red-700 font-bold' :
-                          complaint.priority === 'High' ? 'text-amber-800' : 'text-gray-500'
+                          complaint.priority === 'Critical' ? 'text-red-700' :
+                          complaint.priority === 'High' ? 'text-amber-700' : 'text-slate-500'
                         }`}>
-                          <AlertCircle className={`h-3.5 w-3.5 mr-1.5 ${complaint.priority === 'Critical' ? 'animate-pulse' : 'opacity-60'}`} /> {complaint.priority} Priority
+                          <AlertCircle className={`h-4 w-4 mr-2 ${complaint.priority === 'Critical' ? 'animate-pulse' : ''}`} /> {complaint.priority} Assessment
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="h-6 w-6 text-gray-300 mt-4 group-hover:text-[#008540] group-hover:translate-x-1 transition-all" />
+                    <div className="h-12 w-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mt-4 group-hover:bg-[#008540] group-hover:border-[#008540] transition-all duration-300">
+                       <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-white transition-colors" />
+                    </div>
                   </div>
                 </Link>
               ))}

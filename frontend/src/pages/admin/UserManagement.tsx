@@ -10,13 +10,16 @@ import {
   Edit2
 } from 'lucide-react';
 import api from '../../lib/api';
-import { Skeleton } from '../../components/ui/Skeleton';
+import { TableRowSkeleton } from '../../components/ui/Skeleton';
+import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { useToast } from '../../context/ToastContext';
 
 export default function UserManagement() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const toast = useToast();
 
   const fetchUsers = async () => {
     try {
@@ -24,7 +27,9 @@ export default function UserManagement() {
         params: { search, role: roleFilter } 
       });
       setUsers(res.data.data);
-    } catch (err) {} finally {
+    } catch (err) {
+      // Background re-fetch silent catch
+    } finally {
       setTimeout(() => setLoading(false), 500);
     }
   };
@@ -36,126 +41,139 @@ export default function UserManagement() {
   const toggleStatus = async (id: number, current: boolean) => {
     try {
       await api.patch(`/admin/users/${id}/status`, { isActive: !current });
+      toast.success(current ? 'System Access Suspended.' : 'Identity Access Restored.');
       fetchUsers();
     } catch (err) {
-      alert('Failed to update user status');
+      toast.error('Failed to augment user clearance. Verify network and privileges.');
     }
   };
 
-  if (loading && users.length === 0) return <div className="p-8 space-y-4"><Skeleton className="h-12 w-1/4" /><Skeleton className="h-96 w-full" /></div>;
-
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-slide-up">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight tracking-tighter">Unified Identity Center</h1>
-          <p className="text-gray-500 font-medium italic">Oversee accounts for students, staff, and system administrators.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Unified Identity Center</h1>
+          <p className="text-slate-500 font-medium mt-2">Oversee credentials for students, staff, and system administrators.</p>
         </div>
-        <button className="inline-flex items-center px-6 py-3 bg-[#008540] text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-900/10 hover:translate-y-[-1px] active:scale-95 transition-all">
-          <UserPlus className="mr-2 h-4 w-4" />
-          Register New Account
+        <button className="inline-flex items-center px-8 py-4 bg-[#008540] text-white rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-2xl shadow-emerald-900/20 hover:-translate-y-1 hover:shadow-emerald-900/40 active:scale-95 transition-all">
+          <UserPlus className="mr-3 h-4 w-4" />
+          Register Identity
         </button>
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-primary-500 transition-colors" />
+      <div className="bg-white p-6 rounded-[2rem] border border-slate-100/60 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
           <input 
             type="text" 
-            placeholder="Search by name, email, or credentials..."
+            placeholder="Search active identities or institutional IDs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-xs font-bold focus:ring-2 focus:ring-[#008540] transition-all"
+            className="premium-input pl-14 bg-slate-50 border-none"
           />
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <Filter className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center gap-3 w-full md:w-auto relative">
+          <Filter className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <select 
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-gray-50 border-none rounded-xl px-4 py-3 text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-[#008540]"
+            className="premium-input pl-12 pr-10 w-full md:w-56 appearance-none font-bold bg-slate-50 border-none"
           >
-            <option value="">All Roles</option>
-            <option value="Student">Students</option>
-            <option value="Staff">Staff</option>
-            <option value="Admin">Administrators</option>
+            <option value="">All Affiliations</option>
+            <option value="Student">Scholars</option>
+            <option value="Staff">Faculty</option>
+            <option value="Admin">Overseers</option>
           </select>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-50">
-                <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">User Profile</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Institutional ID</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Role</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Affiliation</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50/30 transition-colors group">
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-black text-xs">
-                        {user.first_name[0]}{user.last_name[0]}
+      {/* Premium Table Component */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHeaderCell>User Profile</TableHeaderCell>
+            <TableHeaderCell>Institutional ID</TableHeaderCell>
+            <TableHeaderCell>Access Tier</TableHeaderCell>
+            <TableHeaderCell>Department</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Controls</TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+             <>
+               <TableRowSkeleton />
+               <TableRowSkeleton />
+               <TableRowSkeleton />
+               <TableRowSkeleton />
+               <TableRowSkeleton />
+             </>
+          ) : users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6}>
+                 <div className="py-16 text-center text-slate-400 font-bold">No identities matched your criteria.</div>
+              </TableCell>
+            </TableRow>
+          ) : (
+             users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-700 font-black text-sm shadow-inner group-hover:scale-105 transition-transform duration-300">
+                      {user.first_name[0]}{user.last_name[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-900 tracking-tight">{user.first_name} {user.last_name}</p>
+                      <div className="flex items-center text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1 group-hover:text-emerald-600/80 transition-colors">
+                          <Mail className="h-3 w-3 mr-1.5" />
+                          {user.email}
                       </div>
-                      <div>
-                        <p className="text-sm font-black text-gray-900 uppercase tracking-tighter">{user.first_name} {user.last_name}</p>
-                        <div className="flex items-center text-[10px] text-gray-400 font-bold group-hover:text-primary-600 transition-colors">
-                           <Mail className="h-3 w-3 mr-1" />
-                           {user.email}
-                        </div>
-                      </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-5 text-sm font-black text-gray-400 font-mono">{user.id_number || 'SYSTEM'}</td>
-                  <td className="px-6 py-5">
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                      user.role_name === 'Admin' ? 'bg-amber-50 text-amber-600' :
-                      user.role_name === 'Staff' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
-                    }`}>
-                      {user.role_name}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center text-xs font-bold text-gray-500">
-                      <Building2 className="h-3.5 w-3.5 mr-2 text-gray-300" />
-                      {user.department_name || 'N/A'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${user.is_active ? 'text-emerald-500' : 'text-rose-500'}`}>
-                      <div className={`h-1.5 w-1.5 rounded-full ${user.is_active ? 'bg-emerald-500' : 'bg-rose-500'} animate-pulse`} />
-                      {user.is_active ? 'Active' : 'Suspended'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => toggleStatus(user.id, user.is_active)}
-                        title={user.is_active ? 'Suspend User' : 'Activate User'}
-                        className={`p-2 rounded-lg transition-colors ${user.is_active ? 'hover:bg-rose-50 text-rose-400 hover:text-rose-600' : 'hover:bg-emerald-50 text-emerald-400 hover:text-emerald-600'}`}
-                      >
-                         {user.is_active ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{user.id_number || 'SYSTEM RECORD'}</span>
+                </TableCell>
+                <TableCell>
+                  <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                    user.role_name === 'Admin' ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-100/50' :
+                    user.role_name === 'Staff' ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100/50' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200/50'
+                  }`}>
+                    {user.role_name}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center text-xs font-bold text-slate-500">
+                    <Building2 className="h-4 w-4 mr-2 text-slate-300 group-hover:text-emerald-400 transition-colors" />
+                    {user.department_name || 'Unassigned'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest ${user.is_active ? 'text-emerald-500' : 'text-slate-400'}`}>
+                    <div className={`h-2 w-2 rounded-full ${user.is_active ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-slate-300'}`} />
+                    {user.is_active ? 'Active' : 'Suspended'}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                    <button 
+                      onClick={() => toggleStatus(user.id, user.is_active)}
+                      title={user.is_active ? 'Suspend Clearance' : 'Restore Clearance'}
+                      className={`p-2.5 rounded-xl transition-all ${user.is_active ? 'hover:bg-red-50 text-slate-300 hover:text-red-500 hover:scale-110 active:scale-95' : 'hover:bg-emerald-50 text-slate-300 hover:text-emerald-500 hover:scale-110 active:scale-95'}`}
+                    >
+                        {user.is_active ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
+                    </button>
+                    <button className="p-2.5 hover:bg-slate-50 text-slate-300 hover:text-slate-600 rounded-xl transition-all hover:scale-110 active:scale-95">
+                      <Edit2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+             ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

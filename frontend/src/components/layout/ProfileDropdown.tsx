@@ -30,9 +30,9 @@ export default function ProfileDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 p-1.5 rounded-2xl hover:bg-white/10 transition-all active:scale-95 group"
+        className="flex items-center gap-3 p-1.5 pr-3 rounded-[1.25rem] bg-white/5 border border-transparent hover:bg-white/10 hover:border-white/10 transition-all active:scale-95 group"
       >
-        <div className="h-9 w-9 rounded-xl bg-white/20 border border-white/20 flex items-center justify-center text-white font-black text-xs shadow-inner">
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 border border-white/20 flex items-center justify-center text-white font-black text-sm shadow-inner group-hover:scale-105 transition-transform duration-300">
           {initials}
         </div>
         <div className="hidden md:block text-left">
@@ -47,10 +47,10 @@ export default function ProfileDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-64 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-          <div className="p-6 bg-slate-50/50 border-b border-slate-50">
+        <div className="absolute right-0 mt-4 w-[280px] bg-white rounded-[2rem] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.15)] border border-slate-100/60 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+          <div className="p-6 bg-gradient-to-br from-slate-50 to-white border-b border-slate-100">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-[#008540] flex items-center justify-center text-white font-black shadow-lg shadow-emerald-900/20">
+              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#008540] to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-900/20 ring-4 ring-emerald-50">
                 {initials}
               </div>
               <div>

@@ -17,6 +17,16 @@ export default function DashboardLayout() {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isSidebarOpen]);
+
 
   // Filter navigation based on role
   
@@ -43,17 +53,19 @@ export default function DashboardLayout() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
+      {/* We use conditional rendering but always apply transition to the backdrop by combining opacity. Wait, react conditional rendering might cut the transition. 
+          Given it's a simple fix without breaking the structure, we use the existing conditional standard but add better backdrop-blur. */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-40 lg:hidden animate-in fade-in duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-[#08271c] text-slate-100 flex-shrink-0 flex flex-col transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed inset-y-0 left-0 z-50 w-[280px] bg-gradient-to-b from-[#08271c] to-[#04120d] text-slate-100 flex-shrink-0 flex flex-col transform transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1) lg:relative lg:translate-x-0
+        ${isSidebarOpen ? 'translate-x-0 shadow-[20px_0_40px_rgba(0,0,0,0.5)]' : '-translate-x-full'}
       `}>
         {/* User Profile Card */}
         <div className="p-8 flex flex-col items-center border-b border-[#12553a] bg-[#061d15]">
@@ -79,12 +91,13 @@ export default function DashboardLayout() {
                 <li key={item.name}>
                   <Link
                     to={item.href}
-                    className={`flex items-center px-4 py-3.5 text-sm font-bold rounded-2xl transition-all duration-300 group ${
+                    className={`flex items-center px-4 py-3.5 text-sm font-bold rounded-2xl transition-all duration-300 group overflow-hidden relative ${
                       isActive 
-                        ? 'text-white bg-[#104631] shadow-xl shadow-black/20 translate-x-2' 
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'text-white bg-[#0e3a29] shadow-lg shadow-black/20 translate-x-1' 
+                        : 'text-slate-400 hover:text-white hover:bg-white/5 active:scale-[0.98]'
                     }`}
                   >
+                    {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-r-full" />}
                     <item.icon className={`h-4 w-4 mr-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? 'text-emerald-400' : 'text-slate-500'}`} />
                     {item.name}
                   </Link>
@@ -106,20 +119,20 @@ export default function DashboardLayout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Sticky Header */}
-        <header className="h-20 lg:h-24 glass-effect sticky top-0 z-30 flex items-center justify-between px-6 lg:px-12 border-b border-slate-100/50 shadow-sm transition-all">
-          <div className="flex items-center gap-4">
+        <header className="h-[88px] lg:h-[104px] glass-effect z-30 flex items-center justify-between px-6 lg:px-12 backdrop-blur-2xl bg-white/70">
+          <div className="flex items-center gap-5">
             <button 
               onClick={toggleSidebar}
-              className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 transition-all"
+              className="lg:hidden p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 shadow-sm hover:shadow-md hover:bg-slate-50 active:scale-95 transition-all"
             >
               <Menu className="h-5 w-5" />
             </button>
             <div className="hidden sm:flex flex-col">
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] leading-none mb-1">Kampala International University</span>
-              <h1 className="text-xl font-black text-slate-900 tracking-tighter leading-none">SCMS <span className="text-emerald-600">Portal</span></h1>
+              <span className="text-[10px] font-black text-emerald-600/80 uppercase tracking-[0.3em] leading-none mb-1.5">Kampala International University</span>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">SCMS <span className="text-emerald-600">Portal</span></h1>
             </div>
             {/* Small screen brand */}
-            <div className="sm:hidden font-black text-xl text-slate-900 tracking-tighter">SCMS</div>
+            <div className="sm:hidden font-black text-2xl text-slate-900 tracking-tighter">SCMS</div>
           </div>
           
           <div className="flex items-center space-x-3 lg:space-x-6">
@@ -130,8 +143,8 @@ export default function DashboardLayout() {
         </header>
 
         {/* Routed Page Container */}
-        <main className="flex-1 overflow-y-auto bg-[#fdfdfd] p-6 lg:p-12 text-slate-800 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto bg-transparent p-6 lg:p-12 text-slate-800 custom-scrollbar">
+          <div className="max-w-[1400px] mx-auto animate-slide-up">
             <Outlet />
           </div>
         </main>

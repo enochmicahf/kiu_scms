@@ -5,7 +5,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = '', variant = 'rectangular' }: SkeletonProps) {
-  const baseClasses = "relative overflow-hidden bg-slate-200/40 rounded-3xl";
+  const baseClasses = "relative overflow-hidden bg-slate-100/80 rounded-3xl";
   const variantClasses = variant === 'circular' ? "rounded-full" : "rounded-3xl";
   
   return (
