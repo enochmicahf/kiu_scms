@@ -9,6 +9,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import api from '../../lib/api';
+import { Skeleton, CardSkeleton, TableRowSkeleton } from '../../components/ui/Skeleton';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface DashboardStats {
   total: number;
@@ -30,103 +32,131 @@ export default function StudentDashboard() {
       } catch (err: any) {
         setError('Failed to load dashboard data');
       } finally {
-        setLoading(false);
+        setTimeout(() => setLoading(false), 500); // Small delay for smooth feel
       }
     };
     fetchStats();
   }, []);
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-64 text-gray-500">Loading dashboard...</div>;
-  }
-
   if (error) {
     return (
-      <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+      <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-xl shadow-md space-y-4">
         <div className="flex items-center">
-          <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-          <p className="text-red-700">{error}</p>
+          <AlertCircle className="h-6 w-6 text-red-400 mr-3" />
+          <div>
+            <h3 className="text-lg font-bold text-red-800 tracking-tight">System Error</h3>
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
         </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-bold transition-all"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
 
-  const statCards = [
+  const statCardsData = [
     { name: 'Total Complaints', value: stats?.total || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { name: 'Pending Review', value: stats?.open || 0, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    { name: 'Resolved Cases', value: stats?.resolved || 0, icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
+    { name: 'Pending Review', value: stats?.open || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { name: 'Resolved Cases', value: stats?.resolved || 0, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 animate-in fade-in duration-500">
       {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-gray-100/50">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Student Dashboard</h1>
-          <p className="text-gray-500 mt-1">Track and manage your institutional grievances.</p>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Dashboard Overview</h1>
+          <p className="text-gray-500 mt-1 font-medium italic text-gray-800">Track and manage your institutional grievances.</p>
         </div>
         <Link
           to="/dashboard/student/complaints/new"
-          className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium text-sm shadow-sm"
+          className="inline-flex items-center px-6 py-3 bg-[#008540] hover:bg-[#007036] text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-primary-900/10 hover:-translate-y-0.5 active:translate-y-0"
         >
-          <PlusCircle className="h-4 w-4 mr-2" />
+          <PlusCircle className="h-5 w-5 mr-2" />
           New Complaint
         </Link>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statCards.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-center">
-            <div className={`${stat.bg} p-3 rounded-lg mr-4`}>
-              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+        {loading ? (
+          <>
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </>
+        ) : (
+          statCardsData.map((stat) => (
+            <div key={stat.name} className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-300">
+              <div className={`${stat.bg} p-4 rounded-xl mr-5 group-hover:scale-110 transition-transform duration-300`}>
+                <stat.icon className={`h-7 w-7 ${stat.color}`} />
+              </div>
+              <div className="text-gray-800">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{stat.name}</p>
+                <p className="text-3xl font-black text-gray-900 mt-1">{stat.value}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Recent Complaints */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-gray-50 flex items-center justify-between">
-          <h2 className="font-bold text-gray-800">Recent Complaints</h2>
-          <Link to="/dashboard/student/complaints" className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center">
-            View all <ArrowRight className="h-4 w-4 ml-1" />
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden border-t-4 border-t-[#008540]">
+        <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/30">
+          <h2 className="font-black text-gray-800 text-lg tracking-tight">Recent Activity</h2>
+          <Link to="/dashboard/student/complaints" className="text-[#008540] hover:text-[#007036] text-sm font-bold flex items-center group">
+            View all history <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-        <div className="overflow-x-auto">
-          {stats?.recent && stats.recent.length > 0 ? (
+
+        <div className="overflow-x-auto min-h-[300px]">
+          {loading ? (
+            <div className="divide-y divide-gray-50">
+              <TableRowSkeleton />
+              <TableRowSkeleton />
+              <TableRowSkeleton />
+            </div>
+          ) : stats?.recent && stats.recent.length > 0 ? (
             <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+              <thead className="bg-gray-50/50 text-gray-500 text-[10px] uppercase font-black tracking-[0.2em]">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">Reference</th>
-                  <th className="px-6 py-4 font-semibold">Title</th>
-                  <th className="px-6 py-4 font-semibold">Category</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
-                  <th className="px-6 py-4 font-semibold text-right">Action</th>
+                  <th className="px-6 py-4">Reference</th>
+                  <th className="px-6 py-4">Subject</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">More</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm">
                 {stats.recent.map((complaint) => (
-                  <tr key={complaint.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{complaint.reference_number}</td>
-                    <td className="px-6 py-4 text-gray-600 truncate max-w-[200px]">{complaint.title}</td>
-                    <td className="px-6 py-4 text-gray-600">{complaint.category_name}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        complaint.status === 'Resolved' ? 'bg-green-100 text-green-700' :
+                  <tr key={complaint.id} className="hover:bg-gray-50/80 transition-all group">
+                    <td className="px-6 py-5">
+                      <span className="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded text-xs">
+                        {complaint.reference_number}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-gray-800 font-bold max-w-[240px] truncate">{complaint.title}</td>
+                    <td className="px-6 py-5 text-gray-500 font-medium">{complaint.category_name}</td>
+                    <td className="px-6 py-5">
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm ${
+                        complaint.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700' :
                         complaint.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                        complaint.status === 'In Progress' ? 'bg-amber-100 text-amber-700' :
                         'bg-blue-100 text-blue-700'
                       }`}>
                         {complaint.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link to={`/dashboard/student/complaints/${complaint.id}`} className="text-primary-600 hover:underline font-medium">
-                        View
+                    <td className="px-6 py-5 text-right">
+                      <Link 
+                        to={`/dashboard/student/complaints/${complaint.id}`} 
+                        className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-600 hover:bg-[#008540] hover:text-white rounded-lg transition-all font-bold text-xs"
+                      >
+                        Detail
                       </Link>
                     </td>
                   </tr>
@@ -134,9 +164,14 @@ export default function StudentDashboard() {
               </tbody>
             </table>
           ) : (
-            <div className="p-12 text-center text-gray-500">
-              <FileText className="h-12 w-12 mx-auto mb-3 opacity-20" />
-              <p>No complaints found. Your latest activity will appear here.</p>
+            <div className="p-8">
+              <EmptyState 
+                icon={FileText}
+                title="No complaints yet"
+                description="Your recent complaints will appear here once you submit them. Click the button below to get started."
+                actionLabel="Submit My First Complaint"
+                actionLink="/dashboard/student/complaints/new"
+              />
             </div>
           )}
         </div>

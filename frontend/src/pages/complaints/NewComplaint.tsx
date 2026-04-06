@@ -187,7 +187,12 @@ export default function NewComplaint() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Detailed Description</label>
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-semibold text-gray-700">Detailed Description</label>
+              <span className={`text-[10px] font-bold ${descriptionValue.length < 20 ? 'text-red-500' : 'text-emerald-500'}`}>
+                {descriptionValue.length} characters
+              </span>
+            </div>
             <textarea
               {...register('description')}
               rows={6}
