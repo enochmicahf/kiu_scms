@@ -31,8 +31,13 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', data);
       if (res.data.status === 'success') {
-        login(res.data.token, res.data.user);
-        navigate('/dashboard/student');
+        const { user, token } = res.data;
+        login(token, user);
+        
+        // Dynamic Role-Based Redirection
+        if (user.role === 'Admin') navigate('/dashboard/admin');
+        else if (user.role === 'Staff') navigate('/dashboard/staff');
+        else navigate('/dashboard/student');
       }
     } catch (err: any) {
       setApiError(err.response?.data?.message || 'Login failed. Please check your credentials.');

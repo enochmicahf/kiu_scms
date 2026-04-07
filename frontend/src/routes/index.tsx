@@ -24,6 +24,16 @@ import SystemConfig from '../pages/admin/SystemConfig';
 import AuditLogs from '../pages/admin/AuditLogs';
 import ReportsOverview from '../pages/admin/ReportsOverview';
 
+import { useAuth } from '../context/AuthContext';
+
+function RoleRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'Admin') return <Navigate to="/dashboard/admin" replace />;
+  if (user.role === 'Staff') return <Navigate to="/dashboard/staff" replace />;
+  return <Navigate to="/dashboard/student" replace />;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -41,25 +51,55 @@ export default function AppRoutes() {
           <DashboardLayout />
         </ProtectedRoute>
       }>
-        <Route index element={<Navigate to="student" replace />} />
-        <Route path="student" element={<StudentDashboard />} />
-        <Route path="student/complaints" element={<ComplaintList />} />
-        <Route path="student/complaints/new" element={<NewComplaint />} />
-        <Route path="student/complaints/:id" element={<ComplaintDetail />} />
+        <Route index element={<RoleRedirect />} />
+        
+        {/* Student Routes */}
+        <Route path="student" element={
+          <ProtectedRoute allowedRoles={['Student']}><StudentDashboard /></ProtectedRoute>
+        } />
+        <Route path="student/complaints" element={
+          <ProtectedRoute allowedRoles={['Student']}><ComplaintList /></ProtectedRoute>
+        } />
+        <Route path="student/complaints/new" element={
+          <ProtectedRoute allowedRoles={['Student']}><NewComplaint /></ProtectedRoute>
+        } />
+        <Route path="student/complaints/:id" element={
+          <ProtectedRoute allowedRoles={['Student']}><ComplaintDetail /></ProtectedRoute>
+        } />
         
         {/* Administrative Management Routes */}
-        <Route path="admin" element={<AdminDashboard />} />
-        <Route path="admin/complaints" element={<ComplaintsList />} />
-        <Route path="admin/users" element={<UserManagement />} />
-        <Route path="admin/org" element={<OrgManagement />} />
-        <Route path="admin/config" element={<SystemConfig />} />
-        <Route path="admin/logs" element={<AuditLogs />} />
-        <Route path="admin/reports" element={<ReportsOverview />} />
+        <Route path="admin" element={
+          <ProtectedRoute allowedRoles={['Admin']}><AdminDashboard /></ProtectedRoute>
+        } />
+        <Route path="admin/complaints" element={
+          <ProtectedRoute allowedRoles={['Admin']}><ComplaintsList /></ProtectedRoute>
+        } />
+        <Route path="admin/users" element={
+          <ProtectedRoute allowedRoles={['Admin']}><UserManagement /></ProtectedRoute>
+        } />
+        <Route path="admin/org" element={
+          <ProtectedRoute allowedRoles={['Admin']}><OrgManagement /></ProtectedRoute>
+        } />
+        <Route path="admin/config" element={
+          <ProtectedRoute allowedRoles={['Admin']}><SystemConfig /></ProtectedRoute>
+        } />
+        <Route path="admin/logs" element={
+          <ProtectedRoute allowedRoles={['Admin']}><AuditLogs /></ProtectedRoute>
+        } />
+        <Route path="admin/reports" element={
+          <ProtectedRoute allowedRoles={['Admin']}><ReportsOverview /></ProtectedRoute>
+        } />
 
         {/* Staff Specific Routes */}
-        <Route path="staff" element={<StaffDashboard />} />
-        <Route path="staff/worklist" element={<ComplaintsList />} />
-        <Route path="staff/complaints/:id" element={<StaffComplaintWorkspace />} />
+        <Route path="staff" element={
+          <ProtectedRoute allowedRoles={['Staff']}><StaffDashboard /></ProtectedRoute>
+        } />
+        <Route path="staff/worklist" element={
+          <ProtectedRoute allowedRoles={['Staff']}><ComplaintsList /></ProtectedRoute>
+        } />
+        <Route path="staff/complaints/:id" element={
+          <ProtectedRoute allowedRoles={['Staff']}><StaffComplaintWorkspace /></ProtectedRoute>
+        } />
 
       </Route>
 
