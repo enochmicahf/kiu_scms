@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Clock, CheckCircle2, AlertCircle, MessageSquare } from 'lucide-react';
+import { Bell, Clock, CheckCircle2, MessageSquare } from 'lucide-react';
 import api from '../../lib/api';
 
 interface Notification {
