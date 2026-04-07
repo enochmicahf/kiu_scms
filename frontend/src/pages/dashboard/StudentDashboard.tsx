@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   FileText, 
   Clock, 
@@ -22,6 +22,9 @@ interface DashboardStats {
 }
 
 export default function StudentDashboard() {
+  const [searchParams] = useSearchParams();
+  const currentView = searchParams.get('view') || 'all';
+  
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -58,6 +61,18 @@ export default function StudentDashboard() {
     );
   }
 
+  // Filtering Logic
+  const filteredComplaints = stats?.recent.filter((c: any) => {
+    if (currentView === 'processing') return c.status === 'Pending' || c.status === 'In Progress';
+    if (currentView === 'resolved') return c.status === 'Resolved';
+    return true; // 'all' view
+  }) || [];
+
+  const viewTitle = 
+    currentView === 'processing' ? 'Active Processing' :
+    currentView === 'resolved' ? 'Verified Resolutions' :
+    'Total Tracked Cases';
+
   const statCardsData = [
     { name: 'Total Tracked Cases', value: stats?.total || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
     { name: 'Active Processing', value: stats?.open || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
@@ -71,13 +86,13 @@ export default function StudentDashboard() {
         <div className="relative">
           <div className="flex items-center gap-3 mb-3">
              <div className="h-1 w-12 bg-[#008540] rounded-full" />
-             <span className="text-[10px] font-black text-[#008540] uppercase tracking-[0.4em]">Administrative Overview</span>
+             <span className="text-[10px] font-black text-[#008540] uppercase tracking-[0.4em]">Institutional Command Center</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-tight">
-            Institutional <span className="text-emerald-600">Command.</span>
+            Grievance <span className="text-emerald-600">Telemetry.</span>
           </h1>
           <p className="text-slate-500 mt-4 font-medium max-w-xl leading-relaxed">
-            Centralized monitoring of your academic and institutional interactions at Kampala International University.
+            Monitoring current state: <span className="text-slate-900 font-bold uppercase tracking-widest">{viewTitle}</span>
           </p>
         </div>
         <Link
@@ -95,7 +110,7 @@ export default function StudentDashboard() {
              Array(3).fill(0).map((_, i) => <StatSkeleton key={i} />)
         ) : (
           statCardsData.map((stat) => (
-            <div key={stat.name} className="premium-card p-10 group relative">
+            <div key={stat.name} className="premium-card p-10 group relative border border-transparent hover:border-slate-100 transition-all">
               <div className="absolute top-0 right-0 p-8 opacity-5">
                  <stat.icon className="h-24 w-24" />
               </div>
@@ -104,7 +119,7 @@ export default function StudentDashboard() {
               </div>
               <div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.name}</p>
-                <p className="text-4xl font-black text-slate-900 tracking-tighter">{stat.value}</p>
+                <p className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</p>
               </div>
             </div>
           ))
@@ -119,8 +134,8 @@ export default function StudentDashboard() {
                 <History className="h-6 w-6" />
              </div>
              <div>
-                <h2 className="font-black text-slate-900 text-xl tracking-tighter leading-none mb-1">Recent Activity Logs</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Temporal auditing of your latest cases</p>
+                <h2 className="font-black text-slate-900 text-xl tracking-tighter leading-none mb-1">{viewTitle}</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Real-time database records for the current selective view</p>
              </div>
           </div>
           <Link to="/dashboard/student/complaints" className="px-6 py-3 bg-white border border-slate-100 rounded-xl text-xs font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-100 shadow-sm transition-all flex items-center group">
@@ -128,12 +143,12 @@ export default function StudentDashboard() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
             <div className="divide-y divide-slate-50">
               {Array(3).fill(0).map((_, i) => <TableRowSkeleton key={i} />)}
             </div>
-          ) : stats?.recent && stats.recent.length > 0 ? (
+          ) : filteredComplaints.length > 0 ? (
             <table className="w-full text-left table-fixed min-w-[800px]">
               <thead>
                 <tr className="bg-white text-[10px] uppercase font-black text-slate-400 tracking-[0.3em] border-b border-slate-50">
@@ -144,7 +159,7 @@ export default function StudentDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {stats.recent.map((complaint) => (
+                {filteredComplaints.map((complaint: any) => (
                   <tr key={complaint.id} className="hover:bg-slate-50/50 transition-all group">
                     <td className="px-12 py-8">
                       <span className="font-black text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] tracking-widest shadow-inner">
@@ -183,9 +198,9 @@ export default function StudentDashboard() {
           ) : (
             <div className="p-24 text-center">
                <div className="flex flex-col items-center opacity-30">
-                  <History className="h-16 w-16 mb-6 animate-pulse" />
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">No Temporal Activity</h3>
-                  <p className="text-sm font-medium mt-2">Historical data banks currently waiting for first entry.</p>
+                  <History className="h-16 w-16 mb-6" />
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">No Selective Records</h3>
+                  <p className="text-sm font-medium mt-2">Historical data banks contain no records for the current filter criteria.</p>
                </div>
             </div>
           )}
@@ -201,7 +216,7 @@ export default function StudentDashboard() {
             <p className="text-emerald-100/60 font-medium text-lg leading-relaxed mb-10">
                Every grievance submitted through the SCMS portal is end-to-end audit-protected. Your identity and institutional records are managed with structural integrity.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex wrap gap-4">
                <Link to="/legal" className="px-8 py-3 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all">Transparency Report</Link>
                <button className="px-8 py-3 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all">Data Privacy Policy</button>
             </div>

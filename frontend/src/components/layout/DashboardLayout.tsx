@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, Settings, Users, Building2, ShieldAlert, BarChart3, ClipboardList, Menu, Bell, LogOut, ChevronDown, ShieldCheck, History, Home } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, Settings, Users, Building2, ShieldAlert, BarChart3, ClipboardList, Menu, Bell, LogOut, ChevronDown, ShieldCheck, History, Home, Clock, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function DashboardLayout() {
@@ -42,7 +42,10 @@ export default function DashboardLayout() {
     { name: 'Staff Dashboard', href: '/dashboard/staff', icon: LayoutDashboard },
     { name: 'Resolution Hub', href: '/dashboard/staff/worklist', icon: ClipboardList },
   ] : [
-    { name: 'My Dashboard', href: '/dashboard/student', icon: LayoutDashboard },
+    { name: 'My Dashboard', href: '/dashboard/student', icon: Home },
+    { name: 'Tracked Cases', href: '/dashboard/student?view=all', icon: FileText, color: 'border-blue-500' },
+    { name: 'Active Processing', href: '/dashboard/student?view=processing', icon: Clock, color: 'border-amber-500' },
+    { name: 'Verified Resolutions', href: '/dashboard/student?view=resolved', icon: CheckCircle, color: 'border-emerald-500' },
     { name: 'My Complaints', href: '/dashboard/student/complaints', icon: FileText },
     { name: 'New Complaint', href: '/dashboard/student/complaints/new', icon: PlusCircle },
   ];
@@ -84,7 +87,7 @@ export default function DashboardLayout() {
         <nav className="flex-1 py-6 overflow-y-auto custom-scrollbar">
           <div className="px-6 text-[10px] font-bold text-slate-600 mb-4 uppercase tracking-[0.2em]">Main</div>
           <ul className="space-y-0.5">
-            {navigation.map((item) => {
+            {navigation.map((item: any) => {
               const currentFullHref = location.pathname + location.search;
               const isActive = currentFullHref === item.href || (location.pathname === item.href && !location.search);
               return (
@@ -93,11 +96,11 @@ export default function DashboardLayout() {
                     to={item.href}
                     className={`flex items-center px-6 py-3 text-[13px] font-medium transition-all duration-200 border-l-4 ${
                       isActive 
-                        ? 'text-white bg-white/5 border-emerald-500' 
-                        : 'text-slate-400 border-transparent hover:text-white hover:bg-white/5'
+                        ? `text-white bg-white/5 ${item.color || 'border-emerald-500'}` 
+                        : `text-slate-400 border-transparent hover:text-white hover:bg-white/5`
                     }`}
                   >
-                    <item.icon className="h-4 w-4 mr-3" />
+                    <item.icon className={`h-4 w-4 mr-3 ${isActive && item.color ? item.color.replace('border-', 'text-') : ''}`} />
                     {item.name}
                   </Link>
                 </li>
