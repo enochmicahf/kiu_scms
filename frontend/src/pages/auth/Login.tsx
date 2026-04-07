@@ -66,7 +66,7 @@ export default function Login() {
                   <span>UNIVERSITY</span>
                 </div>
               </div>
-              <h1 className="text-[22px] font-bold text-gray-900 mt-5">Student Portal</h1>
+              <h1 className="text-[18px] font-bold text-gray-800 mt-5 leading-tight text-center">Student Complaint and Management System</h1>
             </div>
 
             {/* API Error */}
