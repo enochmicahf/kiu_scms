@@ -79,14 +79,14 @@ export default function DashboardLayout() {
             ) : userInitials}
           </div>
           <div className="text-center">
-            <h3 className="text-white font-bold text-xs tracking-wide uppercase leading-tight">{userName}</h3>
-            <p className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-wider">{user?.role || 'User'}</p>
+            <h3 className="text-white font-bold text-sm tracking-wide uppercase leading-tight">{userName}</h3>
+            <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wider">{user?.role || 'User'}</p>
           </div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-6 overflow-y-auto custom-scrollbar">
-          <div className="px-6 text-[10px] font-bold text-slate-600 mb-4 uppercase tracking-[0.2em]">Main</div>
+          <div className="px-6 text-xs font-bold text-slate-600 mb-4 uppercase tracking-[0.2em]">Main</div>
           <ul className="space-y-0.5">
             {navigation.map((item: any) => {
               const currentFullHref = location.pathname + location.search;
@@ -95,7 +95,7 @@ export default function DashboardLayout() {
                 <li key={item.name}>
                   <Link
                     to={item.href}
-                    className={`flex items-center px-6 py-3 text-[13px] font-medium transition-all duration-200 border-l-4 ${
+                    className={`flex items-center px-6 py-3 text-sm font-medium transition-all duration-200 border-l-4 ${
                       isActive 
                         ? `text-white bg-white/5 ${item.color || 'border-emerald-500'}` 
                         : `text-slate-400 border-transparent hover:text-white hover:bg-white/5`
@@ -131,7 +131,7 @@ export default function DashboardLayout() {
               <div className="hidden sm:block p-1 px-2.5 bg-white/5 border border-white/10 rounded mr-3">
                  <Menu className="h-4 w-4 text-slate-500" />
               </div>
-              <h1 className="hidden sm:block text-[13px] font-black text-emerald-500 uppercase tracking-widest">
+              <h1 className="hidden sm:block text-sm font-black text-emerald-500 uppercase tracking-widest">
                 Student Complaint and Management System
               </h1>
               <h1 className="sm:hidden text-lg font-black text-emerald-500 uppercase tracking-widest">
@@ -140,7 +140,7 @@ export default function DashboardLayout() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-4 sm:space-x-6 text-[11px] font-bold text-slate-300">
+          <div className="flex items-center space-x-4 sm:space-x-6 text-sm font-bold text-slate-300">
             <NotificationDropdown />
             <Link to="/dashboard/profile" className="hidden sm:flex items-center gap-2 hover:text-white transition-colors">
               Change password <ChevronDown className="h-3 w-3" />
