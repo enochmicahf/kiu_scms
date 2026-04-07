@@ -3,7 +3,7 @@
 # SCMS Deployment Script
 # Usage: ./scripts/deploy.sh
 
-echo "🚀 Starting SCMS Production Deployment..."
+echo "🚀 Starting SCMS Production Deployment in /www/wwwroot/scms.arosoft.io..."
 
 # 1. Verification
 if [ ! -f ".env" ]; then
