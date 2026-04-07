@@ -86,7 +86,7 @@ export default function StudentDashboard() {
         <div className="relative">
           <div className="flex items-center gap-3 mb-3">
              <div className="h-1 w-12 bg-[#008540] rounded-full" />
-             <span className="text-[10px] font-black text-[#008540] uppercase tracking-[0.4em]">Institutional Command Center</span>
+             <span className="text-xs font-black text-[#008540] uppercase tracking-[0.4em]">Institutional Command Center</span>
           </div>
           <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-tight">
             Grievance <span className="text-emerald-600">Telemetry.</span>
@@ -118,7 +118,7 @@ export default function StudentDashboard() {
                 <stat.icon className={`h-8 w-8 ${stat.color}`} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.name}</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.name}</p>
                 <p className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</p>
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
              </div>
              <div>
                 <h2 className="font-black text-slate-900 text-xl tracking-tighter leading-none mb-1">{viewTitle}</h2>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Real-time database records for the current selective view</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Real-time database records for the current selective view</p>
              </div>
           </div>
           <Link to="/dashboard/student/complaints" className="px-6 py-3 bg-white border border-slate-100 rounded-xl text-xs font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-100 shadow-sm transition-all flex items-center group">
@@ -151,7 +151,7 @@ export default function StudentDashboard() {
           ) : filteredComplaints.length > 0 ? (
             <table className="w-full text-left table-fixed min-w-[800px]">
               <thead>
-                <tr className="bg-white text-[10px] uppercase font-black text-slate-400 tracking-[0.3em] border-b border-slate-50">
+                <tr className="bg-white text-xs uppercase font-black text-slate-400 tracking-[0.3em] border-b border-slate-50">
                   <th className="px-12 py-6 w-1/4">Assessment ID</th>
                   <th className="px-12 py-6 w-2/5">Grievance Narrative</th>
                   <th className="px-12 py-6">Current State</th>
@@ -169,11 +169,11 @@ export default function StudentDashboard() {
                     <td className="px-12 py-8">
                        <div className="max-w-xs xl:max-w-md">
                           <p className="text-sm font-black text-slate-900 tracking-tight leading-tight group-hover:text-emerald-600 transition-colors uppercase truncate">{complaint.title}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5">{complaint.category_name}</p>
+                          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1.5">{complaint.category_name}</p>
                        </div>
                     </td>
                     <td className="px-12 py-8">
-                      <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${
+                      <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border shadow-sm ${
                         complaint.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                         complaint.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-100' :
                         complaint.status === 'In Progress' ? 'bg-amber-50 text-amber-700 border-amber-100' :
@@ -185,7 +185,7 @@ export default function StudentDashboard() {
                     <td className="px-12 py-8 text-right">
                       <Link 
                         to={`/dashboard/student/complaints/${complaint.id}`} 
-                        className="inline-flex items-center gap-2 h-10 px-5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#008540] hover:translate-x-1 transition-all shadow-lg active:scale-90"
+                        className="inline-flex items-center gap-2 h-10 px-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#008540] hover:translate-x-1 transition-all shadow-lg active:scale-90"
                       >
                          <Briefcase className="h-3 w-3" />
                          Examine
