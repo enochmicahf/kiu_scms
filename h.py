@@ -1,0 +1,1 @@
+import bcrypt; print('Admin:', bcrypt.hashpw(b'Admin@1234', bcrypt.gensalt()).decode()); print('Staff:', bcrypt.hashpw(b'Staff@1234', bcrypt.gensalt()).decode()); print('Student:', bcrypt.hashpw(b'Student@1234', bcrypt.gensalt()).decode())
