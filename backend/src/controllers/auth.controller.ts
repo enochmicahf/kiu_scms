@@ -152,3 +152,18 @@ export const resetPassword = async (req: Request, res: Response) => {
   console.log(`[AUTH] Reset Password processed successfully for token: ${token}`);
   res.json({ status: 'success', message: 'Password has been updated locally.' });
 };
+
+// @desc    Get public departments for registration
+export const getPublicDepartments = async (req: Request, res: Response) => {
+  try {
+    const [departments]: any = await db.query(
+      `SELECT d.id, d.name, f.name as faculty_name 
+       FROM departments d 
+       JOIN faculties f ON d.faculty_id = f.id 
+       ORDER BY f.name, d.name`
+    );
+    res.json({ status: 'success', data: departments });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};

@@ -46,7 +46,7 @@ export default function Register() {
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
   useEffect(() => {
-    api.get('/admin/departments').then(res => {
+    api.get('/auth/departments').then(res => {
       if (res.data.data) setDepartments(res.data.data);
     }).catch(() => {
       // Silently fail — departments will be empty
