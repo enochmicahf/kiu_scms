@@ -22,8 +22,8 @@ interface DashboardStats {
 }
 
 export default function StudentDashboard() {
-  const [searchParams] = useSearchParams();
-  const currentView = searchParams.get('view') || 'all';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentView = searchParams.get('view'); // No default 'all'
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +42,10 @@ export default function StudentDashboard() {
     };
     fetchStats();
   }, []);
+
+  const setView = (view: string) => {
+    setSearchParams({ view });
+  };
 
   if (error) {
     return (
@@ -63,7 +67,7 @@ export default function StudentDashboard() {
 
   // Filtering Logic
   const filteredComplaints = stats?.recent.filter((c: any) => {
-    if (currentView === 'processing') return c.status === 'Pending' || c.status === 'In Progress';
+    if (currentView === 'processing') return c.status === 'Pending' || c.status === 'In Progress' || c.status === 'Submitted';
     if (currentView === 'resolved') return c.status === 'Resolved';
     return true; // 'all' view
   }) || [];
@@ -74,33 +78,35 @@ export default function StudentDashboard() {
     'Total Tracked Cases';
 
   const statCardsData = [
-    { name: 'Total Tracked Cases', value: stats?.total || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { name: 'Active Processing', value: stats?.open || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-    { name: 'Verified Resolutions', value: stats?.resolved || 0, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    { id: 'all', name: 'Total Tracked Cases', value: stats?.total || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { id: 'processing', name: 'Active Processing', value: stats?.open || 0, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+    { id: 'resolved', name: 'Verified Resolutions', value: stats?.resolved || 0, icon: CheckCircle, color: 'text-[#008540]', bg: 'bg-emerald-50', border: 'border-emerald-100' },
   ];
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Welcome Institutional Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
         <div className="relative">
-          <div className="flex items-center gap-3 mb-3">
-             <div className="h-1 w-12 bg-[#008540] rounded-full" />
-             <span className="text-xs font-black text-[#008540] uppercase tracking-[0.4em]">Institutional Command Center</span>
+          <div className="flex items-center gap-3 mb-2">
+             <div className="h-1 w-10 bg-[#008540] rounded-full" />
+             <span className="text-[10px] font-black text-[#008540] uppercase tracking-[0.4em]">Administrative Hub</span>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-tight">
-            Grievance <span className="text-emerald-600">Telemetry.</span>
+          <h1 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter leading-tight">
+            Institutional <span className="text-[#008540]">Dashboard.</span>
           </h1>
-          <p className="text-slate-500 mt-4 font-medium max-w-xl leading-relaxed">
-            Monitoring current state: <span className="text-slate-900 font-bold uppercase tracking-widest">{viewTitle}</span>
-          </p>
+          {currentView && (
+            <p className="text-slate-500 mt-2 font-medium text-sm">
+              Currently inspecting: <span className="text-[#008540] font-bold uppercase tracking-widest">{viewTitle}</span>
+            </p>
+          )}
         </div>
         <Link
           to="/dashboard/student/complaints/new"
-          className="inline-flex items-center px-10 py-5 bg-[#008540] text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-emerald-900/20 hover:translate-y-[-2px] transition-all group active:scale-95"
+          className="inline-flex items-center px-10 py-5 bg-[#008540] text-white rounded-[1.2rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-emerald-900/20 hover:translate-y-[-2px] transition-all group active:scale-95"
         >
-          <PlusCircle className="h-5 w-5 mr-3 group-hover:rotate-90 transition-transform duration-500" />
-          Propose Resolution
+          <PlusCircle className="h-4 w-4 mr-3 group-hover:rotate-90 transition-transform duration-500" />
+          Log New Complaint
         </Link>
       </div>
 
@@ -110,116 +116,133 @@ export default function StudentDashboard() {
              Array(3).fill(0).map((_, i) => <StatSkeleton key={i} />)
         ) : (
           statCardsData.map((stat) => (
-            <div key={stat.name} className="premium-card p-10 group relative border border-transparent hover:border-slate-100 transition-all">
-              <div className="absolute top-0 right-0 p-8 opacity-5">
-                 <stat.icon className="h-24 w-24" />
+            <button 
+              key={stat.id} 
+              onClick={() => setView(stat.id)}
+              className={`premium-card p-10 group relative border shadow-sm text-left transition-all ${currentView === stat.id ? 'border-[#008540] ring-4 ring-[#008540]/5 bg-white' : 'border-transparent hover:border-slate-200 bg-white'}`}
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                 <stat.icon className="h-20 w-20" />
               </div>
-              <div className={`${stat.bg} ${stat.border} border h-16 w-16 rounded-[1.5rem] flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+              <div className={`${stat.bg} ${stat.border} border h-14 w-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-500`}>
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
               </div>
               <div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.name}</p>
-                <p className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{stat.name}</p>
+                <p className="text-3xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</p>
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="premium-card flex flex-col">
-        <div className="p-10 lg:p-12 border-b border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6 bg-slate-50/20">
-          <div className="flex items-center gap-5">
-             <div className="h-12 w-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-emerald-600">
-                <History className="h-6 w-6" />
-             </div>
-             <div>
-                <h2 className="font-black text-slate-900 text-xl tracking-tighter leading-none mb-1">{viewTitle}</h2>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Real-time database records for the current selective view</p>
-             </div>
-          </div>
-          <Link to="/dashboard/student/complaints" className="px-6 py-3 bg-white border border-slate-100 rounded-xl text-xs font-black text-slate-600 hover:text-emerald-600 hover:border-emerald-100 shadow-sm transition-all flex items-center group">
-            History Archives <ArrowRight className="h-4 w-4 ml-3 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto min-h-[400px]">
-          {loading ? (
-            <div className="divide-y divide-slate-50">
-              {Array(3).fill(0).map((_, i) => <TableRowSkeleton key={i} />)}
-            </div>
-          ) : filteredComplaints.length > 0 ? (
-            <table className="w-full text-left table-fixed min-w-[800px]">
-              <thead>
-                <tr className="bg-white text-xs uppercase font-black text-slate-400 tracking-[0.3em] border-b border-slate-50">
-                  <th className="px-12 py-6 w-1/4">Assessment ID</th>
-                  <th className="px-12 py-6 w-2/5">Grievance Narrative</th>
-                  <th className="px-12 py-6">Current State</th>
-                  <th className="px-12 py-6 text-right w-1/6">Protocol</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredComplaints.map((complaint: any) => (
-                  <tr key={complaint.id} className="hover:bg-slate-50/50 transition-all group">
-                    <td className="px-12 py-8">
-                      <span className="font-black text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] tracking-widest shadow-inner">
-                        {complaint.reference_number}
-                      </span>
-                    </td>
-                    <td className="px-12 py-8">
-                       <div className="max-w-xs xl:max-w-md">
-                          <p className="text-sm font-black text-slate-900 tracking-tight leading-tight group-hover:text-emerald-600 transition-colors uppercase truncate">{complaint.title}</p>
-                          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1.5">{complaint.category_name}</p>
-                       </div>
-                    </td>
-                    <td className="px-12 py-8">
-                      <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border shadow-sm ${
-                        complaint.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                        complaint.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-100' :
-                        complaint.status === 'In Progress' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                        'bg-blue-50 text-blue-700 border-blue-100'
-                      }`}>
-                        {complaint.status}
-                      </span>
-                    </td>
-                    <td className="px-12 py-8 text-right">
-                      <Link 
-                        to={`/dashboard/student/complaints/${complaint.id}`} 
-                        className="inline-flex items-center gap-2 h-10 px-5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#008540] hover:translate-x-1 transition-all shadow-lg active:scale-90"
-                      >
-                         <Briefcase className="h-3 w-3" />
-                         Examine
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-24 text-center">
-               <div className="flex flex-col items-center opacity-30">
-                  <History className="h-16 w-16 mb-6" />
-                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest">No Selective Records</h3>
-                  <p className="text-sm font-medium mt-2">Historical data banks contain no records for the current filter criteria.</p>
+      {/* Conditional Recent Activity Section (Only shown on click) */}
+      {currentView && (
+        <div className="premium-card flex flex-col animate-in slide-in-from-top-4 duration-500">
+          <div className="p-8 border-b border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+               <div className="h-10 w-10 bg-[#008540]/5 rounded-xl flex items-center justify-center text-[#008540]">
+                  <History className="h-5 w-5" />
+               </div>
+               <div>
+                  <h2 className="font-black text-slate-900 text-lg tracking-tighter leading-none mb-1">{viewTitle}</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active records for selection</p>
                </div>
             </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Promotional Institutional Card */}
-      <div className="bg-[#08271c] rounded-[3rem] p-12 lg:p-20 relative overflow-hidden group">
-         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000" />
-         <div className="relative z-10 max-w-2xl">
-            <ShieldCheck className="h-12 w-12 text-emerald-500 mb-8" />
-            <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tighter leading-none mb-8">Your Privacy is <br/> our <span className="text-emerald-500">Foundation.</span></h2>
-            <p className="text-emerald-100/60 font-medium text-lg leading-relaxed mb-10">
-               Every grievance submitted through the SCMS portal is end-to-end audit-protected. Your identity and institutional records are managed with structural integrity.
-            </p>
-            <div className="flex wrap gap-4">
-               <Link to="/legal" className="px-8 py-3 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all">Transparency Report</Link>
-               <button className="px-8 py-3 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all">Data Privacy Policy</button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setView('')} className="text-[10px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest px-4">Clear Filter</button>
+              <Link to="/dashboard/student/complaints" className="px-5 py-2.5 bg-slate-50 rounded-lg text-[10px] font-black text-slate-600 hover:bg-[#008540] hover:text-white transition-all flex items-center group">
+                History Archives <ArrowRight className="h-3 w-3 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </div>
+          </div>
+
+          <div className="overflow-x-auto min-h-[300px]">
+            {filteredComplaints.length > 0 ? (
+              <table className="w-full text-left table-fixed min-w-[800px]">
+                <thead>
+                  <tr className="bg-slate-50/50 text-[10px] uppercase font-black text-slate-400 tracking-[0.3em] border-b border-slate-100">
+                    <th className="px-10 py-5 w-1/4">Ref ID</th>
+                    <th className="px-10 py-5 w-2/5">Subject</th>
+                    <th className="px-10 py-5">Status</th>
+                    <th className="px-10 py-5 text-right w-1/6">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filteredComplaints.map((complaint: any) => (
+                    <tr key={complaint.id} className="hover:bg-slate-50/30 transition-all group">
+                      <td className="px-10 py-6">
+                        <span className="font-black text-slate-900 bg-slate-100 px-2 py-1 rounded text-[10px] tracking-widest">
+                          {complaint.reference_number}
+                        </span>
+                      </td>
+                      <td className="px-10 py-6">
+                         <div className="max-w-xs">
+                            <p className="text-xs font-black text-slate-900 tracking-tight leading-tight group-hover:text-[#008540] transition-colors uppercase truncate">{complaint.title}</p>
+                            <p className="text-[9px] text-slate-400 font-bold mt-1 tracking-wider uppercase">{complaint.category_name}</p>
+                         </div>
+                      </td>
+                      <td className="px-10 py-6">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                          complaint.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                          complaint.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-100' :
+                          complaint.status === 'In Progress' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                          'bg-blue-50 text-blue-700 border-blue-100'
+                        }`}>
+                          {complaint.status}
+                        </span>
+                      </td>
+                      <td className="px-10 py-6 text-right">
+                        <Link 
+                          to={`/dashboard/student/complaints/${complaint.id}`} 
+                          className="inline-flex items-center gap-2 h-8 px-4 bg-slate-900 text-white rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#008540] transition-all"
+                        >
+                           Examine
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="p-20 text-center">
+                 <History className="h-12 w-12 mx-auto text-slate-200 mb-4" />
+                 <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Zero Matching Records</h3>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!currentView && (
+        <div className="bg-white border-2 border-dashed border-slate-100 rounded-[2rem] p-16 text-center animate-in fade-in duration-1000">
+           <div className="max-w-md mx-auto">
+              <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                 <ShieldCheck className="h-8 w-8 text-slate-300" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-2">Clean Institutional Ledger</h3>
+              <p className="text-xs font-medium text-slate-400 leading-relaxed">Select a category above to inspect specific tracking records, or initialize a new case using the action button.</p>
+           </div>
+        </div>
+      )}
+      
+      {/* Slim Promotional Institutional Card */}
+      <div className="bg-[#08271c] rounded-2xl p-6 lg:p-8 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden group border border-white/5">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+         <div className="relative z-10 flex items-center gap-6">
+            <div className="h-12 w-12 flex-shrink-0 bg-white/10 rounded-xl flex items-center justify-center">
+               <ShieldCheck className="h-6 w-6 text-emerald-500" />
+            </div>
+            <div>
+               <h2 className="text-xl font-black text-white tracking-tighter leading-none mb-1">Privacy is our <span className="text-emerald-500">Foundation.</span></h2>
+               <p className="text-emerald-100/50 font-medium text-[11px] uppercase tracking-wider">
+                  Every grievance is end-to-end audit-protected and structurally managed.
+               </p>
+            </div>
+         </div>
+         <div className="relative z-10 flex gap-4">
+            <Link to="/legal" className="px-6 py-2.5 bg-white text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all">Transparency</Link>
+            <button className="px-6 py-2.5 bg-white/10 text-white border border-white/10 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white/20 transition-all">Policy</button>
          </div>
       </div>
     </div>
