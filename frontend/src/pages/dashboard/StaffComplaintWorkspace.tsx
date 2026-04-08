@@ -267,7 +267,7 @@ export default function StaffComplaintWorkspace() {
             ) : (
               <div className="space-y-2">
                 {complaint.attachments.map(file => (
-                  <a key={file.id} href={`/api/uploads/${file.file_path}`} target="_blank" className="flex items-center p-3 bg-white border border-gray-100 rounded-lg hover:border-[#008540] hover:shadow-sm transition-all group">
+                  <a key={file.id} href={file.file_path} target="_blank" className="flex items-center p-3 bg-white border border-gray-100 rounded-lg hover:border-[#008540] hover:shadow-sm transition-all group">
                     <FileText className="h-4 w-4 mr-3 text-gray-400 group-hover:text-[#008540]" />
                     <span className="text-[10px] font-bold text-gray-700 truncate flex-1">{file.file_name}</span>
                     <Download className="h-3 w-3 text-gray-300" />

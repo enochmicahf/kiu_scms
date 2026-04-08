@@ -200,7 +200,7 @@ export default function ComplaintDetail() {
                 {complaint.attachments.map((file: { id: number; file_path: string; file_name: string }) => (
                   <a 
                     key={file.id}
-                    href={`/api/uploads/${file.file_path}`}
+                    href={file.file_path}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:border-[#008540] hover:shadow-md transition-all group"
