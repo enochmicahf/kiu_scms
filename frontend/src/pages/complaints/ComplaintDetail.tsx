@@ -70,7 +70,7 @@ export default function ComplaintDetail() {
 
   const getStatusConfig = (status: string) => {
     switch(status) {
-      case 'Submitted': return { color: 'text-blue-600', bg: 'bg-blue-50', icon: Clock, border: 'border-blue-200' };
+      case 'Submitted': return { color: 'text-red-600', bg: 'bg-red-50', icon: Clock, border: 'border-red-200' };
       case 'Under Review': return { color: 'text-indigo-600', bg: 'bg-indigo-50', icon: MessageSquare, border: 'border-indigo-200' };
       case 'In Progress': return { color: 'text-amber-600', bg: 'bg-amber-50', icon: MoreVertical, border: 'border-amber-200' };
       case 'Resolved': return { color: 'text-emerald-600', bg: 'bg-emerald-50', icon: CheckCircle2, border: 'border-emerald-200' };
@@ -147,7 +147,7 @@ export default function ComplaintDetail() {
             </div>
             <div className={`flex items-center px-6 py-2.5 rounded-full border-2 ${currentStatus.border} ${currentStatus.bg} ${currentStatus.color} shadow-sm active:scale-95 transition-transform`}>
               <currentStatus.icon className="h-5 w-5 mr-2.5" />
-              <span className="text-sm font-black uppercase tracking-wider">{complaint.status}</span>
+              <span className="text-sm font-black uppercase tracking-wider">{complaint.status === 'Submitted' ? 'Pending' : complaint.status}</span>
             </div>
           </div>
 
@@ -256,7 +256,7 @@ export default function ComplaintDetail() {
                         <div className="absolute -left-2 top-6 w-4 h-4 bg-white border-l border-t border-gray-100 rotate-[-45deg]" />
                         <div className="flex items-center justify-between gap-4 mb-3">
                           <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${config.bg} ${config.color}`}>
-                            {event.status}
+                            {event.status === 'Submitted' ? 'Pending' : event.status}
                           </span>
                           <span className="text-[10px] text-gray-400 font-bold bg-gray-50 px-2 py-0.5 rounded">
                             {new Date(event.created_at).toLocaleString()}

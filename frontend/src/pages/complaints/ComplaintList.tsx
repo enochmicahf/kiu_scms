@@ -68,6 +68,7 @@ export default function ComplaintList() {
       case 'Rejected': return 'bg-red-100 text-red-700';
       case 'In Progress': return 'bg-amber-100 text-amber-700';
       case 'Under Review': return 'bg-blue-100 text-blue-700';
+      case 'Submitted': return 'bg-red-100 text-red-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -102,7 +103,7 @@ export default function ComplaintList() {
               className="premium-input pl-11 pr-8 bg-slate-50 appearance-none font-bold"
             >
               <option value="">All Statuses</option>
-              <option value="Submitted">Submitted</option>
+              <option value="Submitted">Pending</option>
               <option value="Under Review">Under Review</option>
               <option value="Resolved">Resolved</option>
               <option value="Rejected">Rejected</option>
@@ -161,7 +162,7 @@ export default function ComplaintList() {
                           {complaint.reference_number}
                         </span>
                         <span className={`px-3 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest ${getStatusStyle(complaint.status)}`}>
-                          {complaint.status}
+                          {complaint.status === 'Submitted' ? 'Pending' : complaint.status}
                         </span>
                       </div>
                       <h3 className="font-black text-slate-900 leading-tight group-hover:text-[#008540] transition-colors text-xl md:text-2xl tracking-tight">{complaint.title}</h3>

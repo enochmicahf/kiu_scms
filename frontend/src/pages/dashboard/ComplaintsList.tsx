@@ -132,6 +132,7 @@ export default function ComplaintsList() {
     switch(s) {
       case 'Resolved': return 'bg-emerald-100/50 text-emerald-700 border-emerald-200/50';
       case 'Rejected': return 'bg-red-100/50 text-red-700 border-red-200/50';
+      case 'Submitted': return 'bg-red-100/50 text-red-700 border-red-200/50';
       case 'In Progress': return 'bg-amber-100/50 text-amber-700 border-amber-200/50';
       case 'Under Review': return 'bg-blue-100/50 text-blue-700 border-blue-200/50';
       default: return 'bg-slate-100 text-slate-500 border-slate-200';
@@ -194,7 +195,7 @@ export default function ComplaintsList() {
                 className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-black text-slate-600 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none appearance-none transition-all"
               >
                 <option value="">Status: All</option>
-                <option value="Submitted">Submitted</option>
+                <option value="Submitted">Pending</option>
                 <option value="Under Review">Under Review</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Resolved">Resolved</option>
@@ -291,7 +292,7 @@ export default function ComplaintsList() {
                   <td className="px-10 py-8">
                     <div className="flex flex-col gap-3">
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border w-fit shadow-sm ${getStatusColor(c.status)}`}>
-                        {c.status}
+                        {c.status === 'Submitted' ? 'Pending' : c.status}
                       </span>
                       <div className="flex flex-wrap gap-2">
                         <PriorityBadge priority={c.priority} />
@@ -347,7 +348,7 @@ export default function ComplaintsList() {
                    <span className="font-black text-slate-900 bg-white shadow-sm border border-slate-100 px-3 py-1.5 rounded-xl text-[10px] tracking-widest">{c.reference_number}</span>
                    <div className="flex flex-col items-end gap-2">
                      <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-xs ${getStatusColor(c.status)}`}>
-                        {c.status}
+                        {c.status === 'Submitted' ? 'Pending' : c.status}
                      </span>
                      {c.status === 'Resolved' && c.feedback_rating && (
                        <div className="flex items-center gap-1 bg-amber-50 text-amber-600 border border-amber-200 px-2 py-1 rounded-full shadow-sm text-[9px] font-black">

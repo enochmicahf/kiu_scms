@@ -153,7 +153,7 @@ export default function StaffDashboard() {
                     <span className="text-[10px] text-gray-400 font-bold">{new Date(act.changed_at).toLocaleDateString()}</span>
                   </div>
                   <p className="text-sm text-gray-600 font-bold line-clamp-1">
-                    Status updated to <span className="text-[#008540]">"{act.status}"</span> by {act.first_name}
+                    Status updated to <span className="text-[#008540]">"{act.status === 'Submitted' ? 'Pending' : act.status}"</span> by {act.first_name}
                   </p>
                 </div>
               </Link>
@@ -168,14 +168,16 @@ export default function StaffDashboard() {
             {stats?.byStatus.map((s) => (
               <div key={s.status} className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-gray-500 uppercase tracking-tighter">{s.status}</span>
+                  <span className="font-bold text-gray-500 uppercase tracking-tighter">{s.status === 'Submitted' ? 'Pending' : s.status}</span>
                   <span className="font-black text-gray-900">{s.count}</span>
                 </div>
                 <div className="h-1.5 bg-gray-50 rounded-full overflow-hidden border border-gray-50">
                   <div 
                     className={`h-full rounded-full transition-all duration-1000 ${
                       s.status === 'Resolved' ? 'bg-emerald-500' :
-                      s.status === 'Rejected' ? 'bg-red-500' : 'bg-primary-500'
+                      s.status === 'Rejected' ? 'bg-red-500' : 
+                      s.status === 'Submitted' ? 'bg-red-500' :
+                      'bg-primary-500'
                     }`}
                     style={{ width: `${(s.count / (stats?.total || 1)) * 100}%` }}
                   />

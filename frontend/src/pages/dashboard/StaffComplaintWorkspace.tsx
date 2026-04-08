@@ -153,7 +153,7 @@ export default function StaffComplaintWorkspace() {
 
   const getStatusConfig = (status: string) => {
     switch(status) {
-      case 'Submitted': return { color: 'text-blue-600', bg: 'bg-blue-50', icon: Clock, border: 'border-blue-200' };
+      case 'Submitted': return { color: 'text-red-600', bg: 'bg-red-50', icon: Clock, border: 'border-red-200' };
       case 'Under Review': return { color: 'text-indigo-600', bg: 'bg-indigo-50', icon: MessageSquare, border: 'border-indigo-200' };
       case 'In Progress': return { color: 'text-amber-600', bg: 'bg-amber-50', icon: MoreVertical, border: 'border-amber-200' };
       case 'Resolved': return { color: 'text-emerald-600', bg: 'bg-emerald-50', icon: CheckCircle2, border: 'border-emerald-200' };
@@ -189,7 +189,7 @@ export default function StaffComplaintWorkspace() {
 
         <div className="flex items-center gap-3">
           <div className={`px-4 py-1.5 rounded-full border-2 text-[10px] font-black uppercase tracking-wider ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-            {complaint.status}
+            {complaint.status === 'Submitted' ? 'Pending' : complaint.status}
           </div>
           <select 
             value={statusUpdate.status}
@@ -309,7 +309,7 @@ export default function StaffComplaintWorkspace() {
                     <div className="absolute -left-[9px] top-0 h-4 w-4 bg-white border-2 border-primary-500 rounded-full" />
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest bg-primary-50 px-2 py-0.5 rounded">{event.status}</span>
+                        <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest bg-primary-50 px-2 py-0.5 rounded">{event.status === 'Submitted' ? 'Pending' : event.status}</span>
                         <span className="text-[9px] text-gray-400 font-bold">{new Date(event.created_at).toLocaleString()}</span>
                       </div>
                       <p className="text-sm font-bold text-gray-800">"{event.remarks}"</p>

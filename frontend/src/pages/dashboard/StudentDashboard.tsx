@@ -196,9 +196,10 @@ export default function StudentDashboard() {
                           complaint.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                           complaint.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-100' :
                           complaint.status === 'In Progress' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                          complaint.status === 'Submitted' ? 'bg-red-50 text-red-700 border-red-100' :
                           'bg-blue-50 text-blue-700 border-blue-100'
                         }`}>
-                          {complaint.status}
+                          {complaint.status === 'Submitted' ? 'Pending' : complaint.status}
                         </span>
                       </td>
                       <td className="px-10 py-6 text-right">
