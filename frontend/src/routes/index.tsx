@@ -28,7 +28,19 @@ import { useAuth } from '../context/AuthContext';
 
 function RoleRedirect() {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const token = localStorage.getItem('token');
+
+  if (!user && !token) return <Navigate to="/login" replace />;
+  
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <div className="h-10 w-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Resolving Identity...</p>
+      </div>
+    );
+  }
+
   if (user.role === 'Admin') return <Navigate to="/dashboard/admin" replace />;
   if (user.role === 'Staff') return <Navigate to="/dashboard/staff" replace />;
   return <Navigate to="/dashboard/student" replace />;
