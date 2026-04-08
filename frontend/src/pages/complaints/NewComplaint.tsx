@@ -135,28 +135,28 @@ export default function NewComplaint() {
               <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               Return to Safety
             </button>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Log Institutional <span className="text-emerald-600">Grievance</span></h1>
-            <p className="text-slate-500 mt-2 font-medium">Empowering student voices through structured resolution.</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Log Institutional <span className="text-[#008540]">Grievance</span></h1>
+            <p className="text-slate-500 mt-2 font-medium">Empowering student voices through structured, trackable resolution.</p>
         </div>
         <div className="hidden lg:block">
-           <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 rounded-2xl border border-emerald-100/50">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Auditable Entry</span>
+           <div className="flex items-center gap-3 px-4 py-2 bg-[#008540]/5 rounded-2xl border border-[#008540]/10">
+              <ShieldCheck className="h-4 w-4 text-[#008540]" />
+              <span className="text-[10px] font-black text-[#008540] uppercase tracking-widest">Protocol-Secured Entry</span>
            </div>
         </div>
       </div>
 
-      <div className="premium-card relative">
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400" />
+      <div className="premium-card relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#008540] via-[#00a851] to-[#008540]" />
         
-        <form onSubmit={handleSubmit(onSubmit)} className="p-10 lg:p-14 space-y-10">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-10 lg:p-14 space-y-12">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Assessment Category</label>
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Assessment Category</label>
               <select
                 {...register('categoryId')}
-                className={`premium-input py-5 ${errors.categoryId ? 'border-red-300 ring-4 ring-red-50' : ''}`}
+                className={`premium-input py-5 bg-white ${errors.categoryId ? 'border-red-300 ring-4 ring-red-50' : 'focus:border-[#008540]'}`}
               >
                 <option value="">-- Classified Type --</option>
                 {categories.map(cat => (
@@ -167,10 +167,10 @@ export default function NewComplaint() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Grievance Severity</label>
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Grievance Priority</label>
               <select
                 {...register('priority')}
-                className="premium-input py-5"
+                className="premium-input py-5 bg-white focus:border-[#008540]"
               >
                 <option value="Low">Low Priority</option>
                 <option value="Medium">Medium Priority</option>
@@ -181,61 +181,65 @@ export default function NewComplaint() {
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Concise Subject</label>
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Subject / Title</label>
             <input
               type="text"
               {...register('title')}
               placeholder="e.g., Discrepancy in Semester Exam Grading Hub"
-              className={`premium-input py-5 ${errors.title ? 'border-red-300 ring-4 ring-red-50' : ''}`}
+              className={`premium-input py-5 bg-white ${errors.title ? 'border-red-300 ring-4 ring-red-50' : 'focus:border-[#008540]'}`}
             />
             {errors.title && <p className="text-red-500 text-[10px] font-black uppercase tracking-tight ml-2">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center px-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Detailed Exposition</label>
-              <span className={`text-[9px] font-black uppercase tracking-widest ${descriptionValue.length < 20 ? 'text-red-400' : 'text-emerald-500'}`}>
-                Intensity: {descriptionValue.length} / {descriptionValue.length < 20 ? 'Min 20' : 'Optimal'}
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Detailed Narrative</label>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${descriptionValue.length < 20 ? 'text-red-400' : 'text-[#008540]'}`}>
+                {descriptionValue.length < 20 ? `Need ${20 - descriptionValue.length} more chars` : 'Optimal Description'}
               </span>
             </div>
             <textarea
               {...register('description')}
               rows={8}
               placeholder="Provide a comprehensive narrative of the grievance, including specific environmental context, temporal data, and any participating entities."
-              className={`premium-input py-6 resize-none leading-relaxed ${errors.description ? 'border-red-300 ring-4 ring-red-50' : ''}`}
+              className={`premium-input py-6 resize-none leading-relaxed bg-white ${errors.description ? 'border-red-300 ring-4 ring-red-50' : 'focus:border-[#008540]'}`}
             />
             {errors.description && <p className="text-red-500 text-[10px] font-black uppercase tracking-tight ml-2">{errors.description.message}</p>}
           </div>
 
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Supporting Evidence (Maximum 5)</label>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Evidence & Artefacts (Max 5)</label>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="relative group">
-                <label className="flex flex-col items-center justify-center w-full h-44 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-emerald-50/50 hover:border-emerald-200 transition-all active:scale-[0.98]">
+                <label className="flex flex-col items-center justify-center w-full h-44 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] cursor-pointer hover:bg-[#008540]/5 hover:border-[#008540]/30 transition-all active:scale-[0.98]">
                   <div className="flex flex-col items-center justify-center text-center px-4">
-                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:text-emerald-600 transition-all">
+                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:text-[#008540] transition-all">
                        <Plus className="w-8 h-8" />
                     </div>
                     <p className="text-xs font-black text-slate-600 uppercase tracking-widest">Inject Attachments</p>
-                    <p className="text-[9px] text-slate-400 font-bold mt-1">PDF, JPG, PNG (Max 10MB)</p>
+                    <p className="text-[10px] text-slate-400 font-bold mt-1">PDF, JPG, PNG, DOC (Max 10MB)</p>
                   </div>
-                  <input type="file" className="hidden" multiple onChange={handleFileChange} />
+                  <input type="file" className="hidden" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={handleFileChange} />
                 </label>
               </div>
 
-              {files.length > 0 && (
+              {files.length > 0 ? (
                 <div className="space-y-3">
                   {files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group animate-in slide-in-from-right-2">
+                    <div key={index} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 group animate-in slide-in-from-right-2 shadow-sm">
                       <div className="flex items-center overflow-hidden gap-3">
-                        <FileText className="h-5 w-5 text-emerald-500" />
-                        <span className="text-[11px] font-bold text-slate-600 truncate max-w-[140px] uppercase tracking-tighter">{file.name}</span>
+                        <FileText className="h-5 w-5 text-[#008540]" />
+                        <span className="text-[11px] font-black text-slate-700 truncate max-w-[160px] uppercase tracking-tighter">{file.name}</span>
                       </div>
-                      <button onClick={() => removeFile(index)} className="p-2 bg-white text-slate-400 hover:text-red-500 rounded-xl shadow-sm transition-all active:scale-90">
-                        <X className="h-3 w-3" />
+                      <button onClick={() => removeFile(index)} className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all active:scale-90">
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center border-2 border-dashed border-slate-100 rounded-[2rem] p-8 text-center bg-slate-50/30">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No evidence attached.<br/>Optional but recommended.</p>
                 </div>
               )}
             </div>
@@ -245,23 +249,23 @@ export default function NewComplaint() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] hover:text-slate-600 transition-colors"
+              className="text-slate-400 font-black text-[11px] uppercase tracking-[0.2em] hover:text-slate-600 transition-colors"
             >
               Abandon Draft
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-12 py-5 bg-[#008540] text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-emerald-900/20 hover:translate-y-[-2px] hover:shadow-emerald-900/30 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:bg-slate-200"
+              className="w-full sm:w-auto px-14 py-6 bg-[#008540] text-white rounded-[1.8rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-emerald-900/30 hover:translate-y-[-3px] hover:shadow-emerald-900/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:bg-slate-200"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Encrypting & Sending...
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  Encrypting Submission...
                 </>
               ) : (
                 <>
-                   Initialize Case
+                   Initialize Formal Case
                    <Send className="h-4 w-4 rotate-12" />
                 </>
               )}

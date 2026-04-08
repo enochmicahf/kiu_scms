@@ -44,11 +44,10 @@ export default function DashboardLayout() {
     { name: 'Resolution Hub', href: '/dashboard/staff/worklist', icon: ClipboardList },
   ] : [
     { name: 'My Dashboard', href: '/dashboard/student', icon: Home },
-    { name: 'Tracked Cases', href: '/dashboard/student?view=all', icon: FileText, color: 'border-blue-500' },
-    { name: 'Active Processing', href: '/dashboard/student?view=processing', icon: Clock, color: 'border-amber-500' },
-    { name: 'Verified Resolutions', href: '/dashboard/student?view=resolved', icon: CheckCircle, color: 'border-emerald-500' },
+    { name: 'Submit Complaint', href: '/dashboard/student/complaints/new', icon: PlusCircle, color: 'border-[#008540]' },
     { name: 'My Complaints', href: '/dashboard/student/complaints', icon: FileText },
-    { name: 'New Complaint', href: '/dashboard/student/complaints/new', icon: PlusCircle },
+    { name: 'Tracked Cases', href: '/dashboard/student?view=all', icon: Clock },
+    { name: 'Resolution Archive', href: '/dashboard/student?view=resolved', icon: CheckCircle },
   ];
 
   const userName = user ? `${user.firstName} ${user.lastName}` : 'User';

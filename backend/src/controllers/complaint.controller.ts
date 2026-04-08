@@ -3,14 +3,14 @@ import { db } from '../config/database';
 import { NotificationService } from '../services/notification.service';
 import path from 'path';
 
-// Helper: Generate reference number like SCM-2025-000123
+// Helper: Generate reference number like KIU-CMP-2026-000123
 const generateReference = async (): Promise<string> => {
   const year = new Date().getFullYear();
   const [rows]: any = await db.query(
     'SELECT COUNT(*) as total FROM complaints WHERE YEAR(created_at) = ?', [year]
   );
   const seq = (parseInt(rows[0].total) + 1).toString().padStart(6, '0');
-  return `SCM-${year}-${seq}`;
+  return `KIU-CMP-${year}-${seq}`;
 };
 
 // @desc    Submit a new complaint
