@@ -109,11 +109,21 @@ export const getComplaintById = async (req: Request, res: Response) => {
       [id]
     );
 
+    // Get the first review date (earliest event that isn't 'Submitted')
+    const [reviewEvent]: any = await db.query(
+      `SELECT changed_at FROM complaint_status_history 
+       WHERE complaint_id = ? AND status != 'Submitted' 
+       ORDER BY changed_at ASC LIMIT 1`,
+      [id]
+    );
+    const reviewed_at = reviewEvent.length > 0 ? reviewEvent[0].changed_at : null;
+
     // Format response to match expected UI structure
     res.json({
       status: 'success',
       data: { 
         ...complaint, 
+        reviewed_at,
         attachments: attachments.map((a: any) => ({...a, file_name: a.file_path.split('/').pop()})), 
         timeline,
         feedback: complaint.feedback_rating ? {
@@ -273,9 +283,24 @@ export const getAdminStats = async (req: Request, res: Response) => {
       activityQuery += 'WHERE c.assigned_staff_id = ? OR csh.changed_by_user_id = ? ';
     }
     
-    activityQuery += 'ORDER BY csh.changed_at DESC LIMIT 5';
+    activityQuery += 'ORDER BY csh.changed_at DESC LIMIT 15';
     
     const [recent]: any = await db.query(activityQuery, isStaff ? [userId, userId] : []);
+
+    // NEW: Get urgent/overdue cases for staff
+    let urgentCases: any[] = [];
+    if (isStaff) {
+      const [rows]: any = await db.query(
+        `SELECT id, reference_number, title, priority, status, created_at 
+         FROM complaints 
+         WHERE assigned_staff_id = ? 
+         AND status NOT IN ('Resolved', 'Closed', 'Rejected')
+         AND (priority IN ('High', 'Critical') OR created_at < DATE_SUB(NOW(), INTERVAL 72 HOUR))
+         ORDER BY priority DESC, created_at ASC LIMIT 5`,
+        [userId]
+      );
+      urgentCases = rows;
+    }
 
     res.json({
       status: 'success',
@@ -286,6 +311,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
         slaMetrics: slaMetrics[0] ? slaMetrics[0] : { breached: 0, onTrack: 0 },
         totalUsers: users[0].count,
         recentActivity: recent,
+        urgentCases,
         isStaffSpecific: isStaff
       }
     });

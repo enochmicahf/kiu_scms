@@ -22,7 +22,7 @@ interface TimelineEvent {
   id: number;
   status: string;
   remarks: string;
-  created_at: string;
+  changed_at: string;
   created_by_name: string;
 }
 
@@ -37,6 +37,7 @@ interface ComplaintDetail {
   created_at: string;
   attachments: { id: number; file_path: string; file_name: string }[];
   timeline: TimelineEvent[];
+  reviewed_at?: string;
   feedback?: { rating: number; comments: string };
 }
 
@@ -157,6 +158,12 @@ export default function ComplaintDetail() {
               <p className="text-sm font-bold text-gray-800">{new Date(complaint.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
             </div>
             <div className="space-y-1">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center"><CheckCircle2 className="h-3 w-3 mr-1.5" /> Reviewed Date</p>
+              <p className="text-sm font-bold text-gray-800">
+                {complaint.reviewed_at ? new Date(complaint.reviewed_at).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'Awaiting Review'}
+              </p>
+            </div>
+            <div className="space-y-1">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center"><FileText className="h-3 w-3 mr-1.5" /> Category</p>
               <p className="text-sm font-bold text-gray-800">{complaint.category_name}</p>
             </div>
@@ -259,7 +266,7 @@ export default function ComplaintDetail() {
                             {event.status === 'Submitted' ? 'Pending' : event.status}
                           </span>
                           <span className="text-[10px] text-gray-400 font-bold bg-gray-50 px-2 py-0.5 rounded">
-                            {new Date(event.created_at).toLocaleString()}
+                            {event.changed_at ? new Date(event.changed_at).toLocaleString() : 'Processing...'}
                           </span>
                         </div>
                         <p className="text-gray-800 text-sm font-bold leading-relaxed">{event.remarks}</p>

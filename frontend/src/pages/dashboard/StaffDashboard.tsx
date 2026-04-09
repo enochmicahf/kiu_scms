@@ -17,6 +17,7 @@ interface DashboardStats {
   byStatus: { status: string; count: number }[];
   byCategory: { category: string; count: number }[];
   recentActivity: any[];
+  urgentCases: any[];
 }
 
 export default function StaffDashboard() {
@@ -128,36 +129,77 @@ export default function StaffDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent My Activity */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-lg font-black text-gray-900 tracking-tight flex items-center">
               <TrendingUp className="h-5 w-5 mr-3 text-[#008540]" />
-              Recent Case Updates
+              Recent Feed
             </h2>
-            <Link to="/dashboard/staff/worklist" className="text-xs font-black text-[#008540] uppercase tracking-widest hover:underline">View All</Link>
+            <Link to="/dashboard/staff/worklist" className="text-xs font-black text-[#008540] uppercase tracking-widest hover:underline">Full Audit</Link>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {stats?.recentActivity.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">No recent activity on your assigned cases.</div>
+              <div className="py-12 text-center text-gray-400 font-medium">No recent activity detected.</div>
             ) : stats?.recentActivity.map((act) => (
-              <Link key={act.id} to={`/dashboard/staff/complaints/${act.case_id || act.id}`} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group block text-left">
+              <Link key={act.id} to={`/dashboard/staff/complaints/${act.complaint_id || act.id}`} className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 group block text-left">
                 <div className="bg-gray-100 p-3 rounded-xl text-gray-400 group-hover:bg-white group-hover:text-[#008540] transition-all">
-                  <Clock className="h-5 w-5" />
+                  <Clock className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-black text-gray-900 uppercase tracking-tighter">
-                      Case #{act.reference_number}
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      {new Date(act.changed_at).toLocaleDateString()}
                     </p>
-                    <span className="text-[10px] text-gray-400 font-bold">{new Date(act.changed_at).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm text-gray-600 font-bold line-clamp-1">
-                    Status updated to <span className="text-[#008540]">"{act.status === 'Submitted' ? 'Pending' : act.status}"</span> by {act.first_name}
+                  <p className="text-sm text-gray-800 font-bold leading-tight">
+                    <span className="text-[#008540]">#{act.reference_number}:</span> Status set to {act.status === 'Submitted' ? 'Pending' : act.status}
                   </p>
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+
+        {/* Priority Action Required */}
+        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-8 bg-gradient-to-br from-white to-rose-50/30">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-black text-gray-900 tracking-tight flex items-center">
+              <AlertCircle className="h-5 w-5 mr-3 text-rose-500" />
+              Critical Attention
+            </h2>
+            <span className="px-2 py-0.5 bg-rose-500 text-white text-[10px] font-black rounded uppercase tracking-widest">
+              {stats?.urgentCases?.length || 0}
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {stats?.urgentCases.length === 0 ? (
+              <div className="py-12 text-center text-gray-400 font-medium bg-white rounded-xl border border-dashed border-gray-200">
+                All high-priority cases are stabilized.
+              </div>
+            ) : (
+              stats?.urgentCases.map((c) => (
+                <Link key={c.id} to={`/dashboard/staff/complaints/${c.id}`} className="block bg-white p-5 rounded-xl border border-rose-100 shadow-sm hover:shadow-md transition-all group">
+                   <div className="flex justify-between items-start mb-3">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ${
+                        c.priority === 'Critical' ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {c.priority}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-bold">
+                        {Math.round((new Date().getTime() - new Date(c.created_at).getTime()) / (1000 * 3600))}h ago
+                      </span>
+                   </div>
+                   <h4 className="text-sm font-black text-gray-900 leading-tight group-hover:text-rose-600 transition-colors mb-1 truncate">
+                     {c.title}
+                   </h4>
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">
+                     Ref: {c.reference_number} • {c.status}
+                   </p>
+                </Link>
+              ))
+            )}
           </div>
         </div>
 
