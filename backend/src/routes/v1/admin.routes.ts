@@ -10,6 +10,7 @@ import {
   getInternalNotes,
   getAllUsers,
   createUser,
+  updateUser,
   getSettings,
   updateSettings,
   getAuditLogs,
@@ -55,6 +56,10 @@ router.get('/users', requireAuth, requireRole(['Admin']), getAllUsers);
 // @desc    Create a new user (Staff/Admin/Student)
 router.post('/users', requireAuth, requireRole(['Admin']), createUser);
 
+// @route   PUT /api/v1/admin/users/:id
+// @desc    Update an existing user
+router.put('/users/:id', requireAuth, requireRole(['Admin']), updateUser);
+
 // @route   GET /api/v1/admin/settings
 // @desc    Get system settings
 router.get('/settings', requireAuth, requireRole(['Admin', 'Staff']), getSettings);
@@ -70,12 +75,18 @@ router.get('/audit-logs', requireAuth, requireRole(['Admin']), getAuditLogs);
 // Organizational Structure
 router.get('/faculties', requireAuth, requireRole(['Admin', 'Staff']), manageOrg.getFaculties);
 router.post('/faculties', requireAuth, requireRole(['Admin']), manageOrg.createFaculty);
+router.put('/faculties/:id', requireAuth, requireRole(['Admin']), manageOrg.updateFaculty);
+router.delete('/faculties/:id', requireAuth, requireRole(['Admin']), manageOrg.deleteFaculty);
 
 router.get('/departments', requireAuth, requireRole(['Admin', 'Staff']), manageOrg.getDepartments);
 router.post('/departments', requireAuth, requireRole(['Admin']), manageOrg.createDepartment);
+router.put('/departments/:id', requireAuth, requireRole(['Admin']), manageOrg.updateDepartment);
+router.delete('/departments/:id', requireAuth, requireRole(['Admin']), manageOrg.deleteDepartment);
 
 router.get('/categories', requireAuth, requireRole(['Admin', 'Staff']), manageOrg.getCategories);
 router.post('/categories', requireAuth, requireRole(['Admin']), manageOrg.createCategory);
+router.put('/categories/:id', requireAuth, requireRole(['Admin']), manageOrg.updateCategory);
+router.delete('/categories/:id', requireAuth, requireRole(['Admin']), manageOrg.deleteCategory);
 
 // Feedback retrieval
 router.get('/feedback', requireAuth, requireRole(['Admin', 'Staff']), getFeedback);

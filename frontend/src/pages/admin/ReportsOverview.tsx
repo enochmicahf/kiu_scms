@@ -24,6 +24,7 @@ import {
   Area
 } from 'recharts';
 import api from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 const COLORS = ['#008540', '#ed1c24', '#005596', '#fdb813', '#7a2182', '#00aed9'];
 
@@ -31,6 +32,7 @@ export default function ReportsOverview() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const toast = useToast();
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -59,11 +61,16 @@ export default function ReportsOverview() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      toast.success('Grievance export complete');
     } catch (err) {
-      console.error('Export failed');
+      toast.error('Export failed');
     } finally {
       setExporting(false);
     }
+  };
+
+  const handlePdfGeneration = () => {
+    toast.info('PDF Generation Engine is being initialized for your institution.');
   };
 
   if (loading) {
@@ -92,9 +99,9 @@ export default function ReportsOverview() {
           <button 
             onClick={handleExport}
             disabled={exporting}
-            className="inline-flex items-center px-6 py-3 bg-[#008540] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl hover:translate-y-[-2px] transition-all disabled:bg-gray-200 active:scale-95"
+            className="inline-flex items-center px-6 py-3 bg-[#008540] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl hover:translate-y-[-2px] transition-all disabled:bg-gray-200 active:scale-95"
           >
-             {exporting ? <RefreshCcw className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-2 h-3.5 w-3.5" />}
+             {exporting ? <RefreshCcw className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
              Export Snapshot
           </button>
         </div>
@@ -151,8 +158,8 @@ export default function ReportsOverview() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="month" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
+                <XAxis dataKey="month" fontSize={12} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
+                <YAxis fontSize={12} axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 />
@@ -173,8 +180,8 @@ export default function ReportsOverview() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data?.resolutionTime}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="category" fontSize={10} axisLine={false} tickLine={false} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} />
+                <XAxis dataKey="category" fontSize={12} axisLine={false} tickLine={false} />
+                <YAxis fontSize={12} axisLine={false} tickLine={false} />
                 <Tooltip 
                   cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
@@ -219,7 +226,10 @@ export default function ReportsOverview() {
                Our institutional reporting engine analyzes case data to help resolve bottlenecks and ensure every Student's voice is heard at Kampala International University.
             </p>
             <div className="flex gap-4">
-               <button className="px-8 py-3 bg-white text-emerald-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all flex items-center gap-2">
+               <button 
+                onClick={handlePdfGeneration}
+                className="px-8 py-4 bg-white text-emerald-900 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all flex items-center gap-2 active:scale-95"
+               >
                   <FileText className="h-4 w-4" />
                   Detailed PDF Summary
                </button>

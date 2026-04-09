@@ -13,13 +13,18 @@ import api from '../../lib/api';
 import { TableRowSkeleton } from '../../components/ui/Skeleton';
 import { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 import { useToast } from '../../context/ToastContext';
+import { Modal } from '../../components/ui/Modal';
 
 export default function UserManagement() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [departments, setDepartments] = useState<any[]>([]);
   const toast = useToast();
+
+  const [userModal, setUserModal] = useState<{ open: boolean; data: any | null }>({ open: false, data: null });
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -27,16 +32,25 @@ export default function UserManagement() {
         params: { search, role: roleFilter } 
       });
       setUsers(res.data.data);
-    } catch (err) {
-      // Background re-fetch silent catch
-    } finally {
+    } catch (err) {} finally {
       setTimeout(() => setLoading(false), 500);
     }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await api.get('/admin/departments');
+      setDepartments(res.data.data);
+    } catch (err) {}
   };
 
   useEffect(() => {
     fetchUsers();
   }, [search, roleFilter]);
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
 
   const toggleStatus = async (id: number, current: boolean) => {
     try {
@@ -44,7 +58,29 @@ export default function UserManagement() {
       toast.success(current ? 'System Access Suspended.' : 'Identity Access Restored.');
       fetchUsers();
     } catch (err) {
-      toast.error('Failed to augment user clearance. Verify network and privileges.');
+      toast.error('Failed to augment user clearance.');
+    }
+  };
+
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(fd.entries());
+    setSubmitting(true);
+    try {
+      if (userModal.data) {
+        await api.put(`/admin/users/${userModal.data.id}`, data);
+        toast.success('Identity profile updated');
+      } else {
+        await api.post('/admin/users', data);
+        toast.success('New identity registered successfully');
+      }
+      setUserModal({ open: false, data: null });
+      fetchUsers();
+    } catch (err) {
+      toast.error('Failed to finalize identity record.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -55,8 +91,11 @@ export default function UserManagement() {
           <h1 className="text-4xl font-black text-slate-900 tracking-tighter">Unified Identity Center</h1>
           <p className="text-slate-500 font-medium mt-2">Oversee credentials for students, staff, and system administrators.</p>
         </div>
-        <button className="inline-flex items-center px-8 py-4 bg-[#008540] text-white rounded-[1.5rem] font-black uppercase text-[10px] tracking-widest shadow-2xl shadow-emerald-900/20 hover:-translate-y-1 hover:shadow-emerald-900/40 active:scale-95 transition-all">
-          <UserPlus className="mr-3 h-4 w-4" />
+        <button 
+          onClick={() => setUserModal({ open: true, data: null })}
+          className="inline-flex items-center px-8 py-4 bg-[#008540] text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest shadow-2xl shadow-emerald-900/20 hover:-translate-y-1 hover:shadow-emerald-900/40 active:scale-95 transition-all"
+        >
+          <UserPlus className="mr-3 h-5 w-5" />
           Register Identity
         </button>
       </div>
@@ -124,8 +163,8 @@ export default function UserManagement() {
                       {user.first_name[0]}{user.last_name[0]}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-slate-900 tracking-tight">{user.first_name} {user.last_name}</p>
-                      <div className="flex items-center text-[10px] uppercase tracking-widest text-slate-400 font-bold mt-1 group-hover:text-emerald-600/80 transition-colors">
+                      <p className="text-base font-black text-slate-900 tracking-tight">{user.first_name} {user.last_name}</p>
+                      <div className="flex items-center text-xs uppercase tracking-widest text-slate-400 font-bold mt-1 group-hover:text-emerald-600/80 transition-colors">
                           <Mail className="h-3 w-3 mr-1.5" />
                           {user.email}
                       </div>
@@ -133,10 +172,10 @@ export default function UserManagement() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">{user.id_number || 'SYSTEM RECORD'}</span>
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">{user.id_number || 'SYSTEM RECORD'}</span>
                 </TableCell>
                 <TableCell>
-                  <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                  <span className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-widest ${
                     user.role_name === 'Admin' ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-100/50' :
                     user.role_name === 'Staff' ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100/50' : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200/50'
                   }`}>
@@ -144,14 +183,14 @@ export default function UserManagement() {
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center text-xs font-bold text-slate-500">
+                  <div className="flex items-center text-sm font-bold text-slate-500">
                     <Building2 className="h-4 w-4 mr-2 text-slate-300 group-hover:text-emerald-400 transition-colors" />
                     {user.department_name || 'Unassigned'}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className={`flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest ${user.is_active ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    <div className={`h-2 w-2 rounded-full ${user.is_active ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-slate-300'}`} />
+                  <div className={`flex items-center gap-2.5 text-xs font-black uppercase tracking-widest ${user.is_active ? 'text-emerald-500' : 'text-slate-400'}`}>
+                    <div className={`h-2.5 w-2.5 rounded-full ${user.is_active ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-slate-300'}`} />
                     {user.is_active ? 'Active' : 'Suspended'}
                   </div>
                 </TableCell>
@@ -164,7 +203,10 @@ export default function UserManagement() {
                     >
                         {user.is_active ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
                     </button>
-                    <button className="p-2.5 hover:bg-slate-50 text-slate-300 hover:text-slate-600 rounded-xl transition-all hover:scale-110 active:scale-95">
+                    <button 
+                      onClick={() => setUserModal({ open: true, data: user })}
+                      className="p-2.5 hover:bg-slate-50 text-slate-300 hover:text-slate-600 rounded-xl transition-all hover:scale-110 active:scale-95"
+                    >
                       <Edit2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -174,6 +216,78 @@ export default function UserManagement() {
           )}
         </TableBody>
       </Table>
+
+      <Modal 
+        isOpen={userModal.open} 
+        onClose={() => setUserModal({ open: false, data: null })}
+        title={userModal.data ? 'Update Identity' : 'Register New Identity'}
+      >
+        <form onSubmit={handleSaveUser} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">First Name</label>
+                <input name="firstName" defaultValue={userModal.data?.first_name || ''} required className="premium-input w-full" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Name</label>
+                <input name="lastName" defaultValue={userModal.data?.last_name || ''} required className="premium-input w-full" />
+             </div>
+          </div>
+
+          <div className="space-y-2">
+             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email Address</label>
+             <input type="email" name="email" defaultValue={userModal.data?.email || ''} required className="premium-input w-full" />
+          </div>
+
+          {!userModal.data && (
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Initial Password</label>
+               <input type="password" name="password" required className="premium-input w-full" />
+            </div>
+          )}
+
+          <div className="space-y-2">
+             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Institutional Affiliation</label>
+             <select name="roleName" defaultValue={userModal.data?.role_name || ''} required className="premium-input w-full">
+                <option value="">Select Role</option>
+                <option value="Student">Student</option>
+                <option value="Staff">Staff</option>
+                <option value="Admin">Administrator</option>
+             </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Institutional ID</label>
+                <input name="idNumber" defaultValue={userModal.data?.id_number || ''} className="premium-input w-full" placeholder="e.g. ST/001" />
+             </div>
+             <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Department</label>
+                <select name="departmentId" defaultValue={userModal.data?.department_id || ''} className="premium-input w-full">
+                   <option value="">N/A</option>
+                   {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+             </div>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+             <button 
+               type="button" 
+               onClick={() => setUserModal({ open: false, data: null })}
+               className="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+             >
+                Cancel
+             </button>
+             <button 
+               disabled={submitting}
+               type="submit" 
+               className="flex-1 py-4 bg-[#008540] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl transition-all disabled:opacity-50"
+             >
+                {submitting ? 'Committing...' : (userModal.data ? 'Update Profile' : 'Gain Access')}
+             </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

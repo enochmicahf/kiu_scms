@@ -424,6 +424,49 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Update an existing user
+export const updateUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { firstName, lastName, email, roleName, idNumber, departmentId } = req.body;
+  const adminId = (req as any).user?.userId;
+
+  try {
+    // 1. Get role ID
+    const [roles]: any = await db.query('SELECT id FROM roles WHERE name = ?', [roleName]);
+    if (roles.length === 0) return res.status(400).json({ status: 'error', message: 'Invalid role' });
+    const roleId = roles[0].id;
+
+    // 2. Update User record
+    await db.query(
+      'UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ? WHERE id = ?',
+      [roleId, firstName, lastName, email, id]
+    );
+
+    // 3. Update Role-specific record
+    if (roleName === 'Student' && idNumber && departmentId) {
+      await db.query(
+        'INSERT INTO students (user_id, student_number, department_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE student_number = ?, department_id = ?',
+        [id, idNumber, departmentId, idNumber, departmentId]
+      );
+    } else if (roleName === 'Staff' && idNumber && departmentId) {
+      await db.query(
+        'INSERT INTO staff (user_id, staff_number, department_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE staff_number = ?, department_id = ?',
+        [id, idNumber, departmentId, idNumber, departmentId]
+      );
+    }
+
+    // 4. Log audit
+    await db.query(
+      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
+      [adminId, 'UPDATE_USER', `Updated user: ${firstName} ${lastName} (${email})`]
+    );
+
+    res.json({ status: 'success', message: 'User updated successfully' });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
 // @desc    Get system settings
 export const getSettings = async (req: Request, res: Response) => {
   try {
@@ -517,6 +560,42 @@ export const manageOrg = {
     try {
       await db.query('INSERT INTO complaint_categories (name, description) VALUES (?, ?)', [req.body.name, req.body.description]);
       res.json({ status: 'success', message: 'Category created' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  updateFaculty: async (req: Request, res: Response) => {
+    try {
+      await db.query('UPDATE faculties SET name = ? WHERE id = ?', [req.body.name, req.params.id]);
+      res.json({ status: 'success', message: 'Faculty updated' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  deleteFaculty: async (req: Request, res: Response) => {
+    try {
+      await db.query('DELETE FROM faculties WHERE id = ?', [req.params.id]);
+      res.json({ status: 'success', message: 'Faculty deleted' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  updateDepartment: async (req: Request, res: Response) => {
+    try {
+      await db.query('UPDATE departments SET faculty_id = ?, name = ? WHERE id = ?', [req.body.facultyId, req.body.name, req.params.id]);
+      res.json({ status: 'success', message: 'Department updated' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  deleteDepartment: async (req: Request, res: Response) => {
+    try {
+      await db.query('DELETE FROM departments WHERE id = ?', [req.params.id]);
+      res.json({ status: 'success', message: 'Department deleted' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  updateCategory: async (req: Request, res: Response) => {
+    try {
+      await db.query('UPDATE complaint_categories SET name = ?, description = ? WHERE id = ?', [req.body.name, req.body.description, req.params.id]);
+      res.json({ status: 'success', message: 'Category updated' });
+    } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
+  },
+  deleteCategory: async (req: Request, res: Response) => {
+    try {
+      await db.query('DELETE FROM complaint_categories WHERE id = ?', [req.params.id]);
+      res.json({ status: 'success', message: 'Category deleted' });
     } catch (err: any) { res.status(500).json({ status: 'error', message: err.message }); }
   }
 };

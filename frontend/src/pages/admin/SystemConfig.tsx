@@ -23,6 +23,10 @@ export default function SystemConfig() {
   const [settings, setSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const toast = useToast();
+
+  const [categoryModal, setCategoryModal] = useState<{ open: boolean; data: any | null }>({ open: false, data: null });
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
 
   const fetchData = async () => {
     try {
@@ -46,9 +50,49 @@ export default function SystemConfig() {
     setSubmitting(true);
     try {
       await api.put('/admin/settings', settings);
-      alert('Settings updated successfully');
+      toast.success('System parameters updated');
     } catch (err) {
-      alert('Failed to update settings');
+      toast.error('Failed to update settings');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSaveCategory = async (e: FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData(e.target as HTMLFormElement);
+    const name = fd.get('name') as string;
+    const description = fd.get('description') as string;
+    
+    setSubmitting(true);
+    try {
+      if (categoryModal.data) {
+        await api.put(`/admin/categories/${categoryModal.data.id}`, { name, description });
+        toast.success('Category updated');
+      } else {
+        await api.post('/admin/categories', { name, description });
+        toast.success('New category added');
+        (e.target as HTMLFormElement).reset();
+      }
+      setCategoryModal({ open: false, data: null });
+      fetchData();
+    } catch (err) {
+      toast.error('Operation failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!confirmDelete.id) return;
+    setSubmitting(true);
+    try {
+      await api.delete(`/admin/categories/${confirmDelete.id}`);
+      toast.success('Category removed');
+      setConfirmDelete({ open: false, id: null });
+      fetchData();
+    } catch (err) {
+      toast.error('Deletion failed');
     } finally {
       setSubmitting(false);
     }
@@ -69,20 +113,20 @@ export default function SystemConfig() {
       <div className="bg-white p-2 rounded-2xl border border-gray-100 shadow-sm inline-flex gap-2">
         <button 
           onClick={() => setActiveTab('categories')}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
             activeTab === 'categories' ? 'bg-[#008540] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          <LayoutGrid className="h-3.5 w-3.5" />
+          <LayoutGrid className="h-4 w-4" />
           Complaint Categories
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
-          className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
             activeTab === 'settings' ? 'bg-[#008540] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          <Settings className="h-3.5 w-3.5" />
+          <Settings className="h-4 w-4" />
           Global Parameters
         </button>
       </div>
@@ -103,10 +147,16 @@ export default function SystemConfig() {
                      </div>
                   </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                     <button className="p-2 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
+                     <button 
+                       onClick={() => setCategoryModal({ open: true, data: cat })}
+                       className="p-2.5 hover:bg-gray-100 text-gray-400 hover:text-[#008540] rounded-xl transition-all active:scale-95"
+                     >
                         <Edit2 className="h-4 w-4" />
                      </button>
-                     <button className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-600 rounded-lg transition-colors">
+                     <button 
+                       onClick={() => setConfirmDelete({ open: true, id: cat.id })}
+                       className="p-2.5 hover:bg-rose-50 text-gray-400 hover:text-rose-600 rounded-xl transition-all active:scale-95"
+                     >
                         <Trash2 className="h-4 w-4" />
                      </button>
                   </div>
@@ -121,17 +171,20 @@ export default function SystemConfig() {
                   <Plus className="h-4 w-4 mr-2" />
                   Define New Category
                </h3>
-               <form className="space-y-4">
+               <form onSubmit={handleSaveCategory} className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</label>
-                    <input type="text" placeholder="e.g. Financial" className="w-full bg-gray-50 border-none rounded-xl p-3 text-xs font-bold focus:ring-[#008540]" />
+                    <input name="name" type="text" placeholder="e.g. Financial" required className="premium-input w-full" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</label>
-                    <textarea placeholder="Describe what kind of complaints fall here..." className="w-full bg-gray-50 border-none rounded-xl p-3 text-xs font-bold focus:ring-[#008540] h-24" />
+                    <textarea name="description" placeholder="Describe what kind of complaints fall here..." required className="premium-input w-full h-24" />
                   </div>
-                  <button className="w-full py-4 bg-[#008540] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl transition-all">
-                     Confirm New Category
+                  <button 
+                    disabled={submitting}
+                    className="w-full py-4 bg-[#008540] text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                  >
+                     {submitting ? 'Registering...' : 'Confirm New Category'}
                   </button>
                </form>
             </div>
@@ -151,9 +204,9 @@ export default function SystemConfig() {
                   </button>
                   <button 
                     disabled={submitting}
-                    className="flex items-center gap-2 px-6 py-2 bg-[#008540] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2 bg-[#008540] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:shadow-lg transition-all disabled:opacity-50"
                   >
-                     <Save className="h-3.5 w-3.5" />
+                     <Save className="h-4 w-4" />
                      {submitting ? 'Updating...' : 'Commit Changes'}
                   </button>
                 </div>
@@ -235,6 +288,73 @@ export default function SystemConfig() {
           </form>
         </div>
       )}
+      {/* Edit Category Modal */}
+      <Modal 
+        isOpen={categoryModal.open} 
+        onClose={() => setCategoryModal({ open: false, data: null })}
+        title="Edit Category"
+      >
+        <form onSubmit={handleSaveCategory} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Category Name</label>
+            <input name="name" defaultValue={categoryModal.data?.name || ''} required className="premium-input w-full" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</label>
+            <textarea name="description" defaultValue={categoryModal.data?.description || ''} required className="premium-input w-full h-32" />
+          </div>
+          <div className="flex gap-4 pt-4">
+             <button 
+               type="button" 
+               onClick={() => setCategoryModal({ open: false, data: null })}
+               className="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+             >
+                Cancel
+             </button>
+             <button 
+               disabled={submitting}
+               type="submit" 
+               className="flex-1 py-4 bg-[#008540] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/10 hover:shadow-xl transition-all disabled:opacity-50"
+             >
+                {submitting ? 'Updating...' : 'Save Changes'}
+             </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal 
+        isOpen={confirmDelete.open} 
+        onClose={() => setConfirmDelete({ open: false, id: null })}
+        title="Remove Category"
+      >
+        <div className="space-y-6 text-center">
+          <div className="h-20 w-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto text-rose-500">
+             <Trash2 className="h-10 w-10" />
+          </div>
+          <div>
+            <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase mb-2">Are you sure?</h4>
+            <p className="text-slate-500 font-medium">
+              This will permanently remove the category. Existing complaints will lose their classification association.
+            </p>
+          </div>
+          <div className="flex gap-4 pt-4">
+             <button 
+               onClick={() => setConfirmDelete({ open: false, id: null })}
+               className="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+             >
+                Keep it
+             </button>
+             <button 
+               disabled={submitting}
+               onClick={handleDeleteCategory}
+               className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-rose-900/10 hover:shadow-xl transition-all disabled:opacity-50"
+             >
+                {submitting ? 'Removing...' : 'Yes, Delete'}
+             </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
