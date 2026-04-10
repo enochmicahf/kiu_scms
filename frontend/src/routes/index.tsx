@@ -15,6 +15,7 @@ import ComplaintDetail from '../pages/complaints/ComplaintDetail';
 import ComplaintsList from '../pages/dashboard/ComplaintsList';
 import StaffDashboard from '../pages/dashboard/StaffDashboard';
 import StaffComplaintWorkspace from '../pages/dashboard/StaffComplaintWorkspace';
+import TransparencyBoard from '../pages/dashboard/TransparencyBoard';
 
 // Phase 5: Administrative Control Panel
 import AdminDashboard from '../pages/admin/AdminDashboard';
@@ -64,6 +65,9 @@ export default function AppRoutes() {
         </ProtectedRoute>
       }>
         <Route index element={<RoleRedirect />} />
+        
+        {/* Common Routes */}
+        <Route path="public-board" element={<TransparencyBoard />} />
         
         {/* Student Routes */}
         <Route path="student" element={

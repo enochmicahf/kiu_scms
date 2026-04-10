@@ -7,7 +7,8 @@ import {
   getCategories,
   submitFeedback,
   getNotifications,
-  markNotificationAsRead
+  markNotificationAsRead,
+  getPublicComplaints
 } from '../../controllers/complaint.controller';
 import { requireAuth } from '../../middlewares/auth.middleware';
 import { upload } from '../../middlewares/upload.middleware';
@@ -16,6 +17,7 @@ const router = Router();
 
 // Public/Common routes (Auth required for categories too for security)
 router.get('/categories', requireAuth, getCategories);
+router.get('/public', requireAuth, getPublicComplaints);
 
 // Student routes
 router.post('/', requireAuth, upload.array('attachments', 5), submitComplaint);

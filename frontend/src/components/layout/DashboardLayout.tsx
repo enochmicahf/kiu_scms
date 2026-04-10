@@ -39,15 +39,18 @@ export default function DashboardLayout() {
     { name: 'System Configuration', href: '/dashboard/admin/config', icon: Settings },
     { name: 'Audit Logs', href: '/dashboard/admin/logs', icon: ShieldAlert },
     { name: 'Institutional Reports', href: '/dashboard/admin/reports', icon: BarChart3 },
+    { name: 'Transparency Board', href: '/dashboard/public-board', icon: BarChart3 },
   ] : user?.role === 'Staff' ? [
     { name: 'Staff Dashboard', href: '/dashboard/staff', icon: LayoutDashboard },
     { name: 'Resolution Hub', href: '/dashboard/staff/worklist', icon: ClipboardList },
+    { name: 'Transparency Board', href: '/dashboard/public-board', icon: BarChart3 },
   ] : [
     { name: 'My Dashboard', href: '/dashboard/student', icon: Home },
     { name: 'Submit Complaint', href: '/dashboard/student/complaints/new', icon: PlusCircle, color: 'border-[#008540]' },
     { name: 'My Complaints', href: '/dashboard/student/complaints', icon: FileText },
     { name: 'Tracked Cases', href: '/dashboard/student?view=all', icon: Clock },
     { name: 'Resolution Archive', href: '/dashboard/student?view=resolved', icon: CheckCircle },
+    { name: 'Transparency Board', href: '/dashboard/public-board', icon: BarChart3 },
   ];
 
   const userName = user ? `${user.firstName} ${user.lastName}` : 'User';

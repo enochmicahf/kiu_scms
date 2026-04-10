@@ -275,3 +275,40 @@ export const markNotificationAsRead = async (req: Request, res: Response) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+// @desc    Get all public complaints for transparency board
+export const getPublicComplaints = async (req: Request, res: Response) => {
+  try {
+    const [rows]: any = await db.query(
+      `SELECT c.id, c.reference_number, c.title, c.status, c.created_at, 
+              cc.name as category_name,
+              u.first_name as student_first_name, u.last_name as student_last_name,
+              (SELECT changed_at FROM complaint_status_history WHERE complaint_id = c.id AND status != 'Submitted' ORDER BY changed_at ASC LIMIT 1) as reviewed_at,
+              su.first_name as staff_first_name, su.last_name as staff_last_name
+       FROM complaints c
+       JOIN complaint_categories cc ON c.category_id = cc.id
+       JOIN students s ON c.student_id = s.id
+       JOIN users u ON s.user_id = u.id
+       LEFT JOIN users su ON c.assigned_staff_id = su.id
+       ORDER BY c.created_at DESC`
+    );
+
+    const [stats]: any = await db.query(
+      `SELECT cc.name as category, COUNT(c.id) as count 
+       FROM complaint_categories cc 
+       JOIN complaints c ON cc.id = c.category_id 
+       GROUP BY cc.name`
+    );
+
+    res.json({ 
+      status: 'success', 
+      data: {
+        complaints: rows,
+        categoryStats: stats
+      } 
+    });
+  } catch (err: any) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
