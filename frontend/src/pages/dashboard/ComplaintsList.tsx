@@ -139,6 +139,20 @@ export default function ComplaintsList() {
     }
   };
 
+  const handleClaim = async (complaintId: number) => {
+    if (!user?.id) return;
+    setSubmitting(true);
+    try {
+      await api.patch(`/admin/complaints/${complaintId}/assign`, { staffId: user.id });
+      const res = await api.get('/admin/complaints', { params: { search, status, priority, page, limit } });
+      setComplaints(res.data.data);
+    } catch (err) {
+      alert('Failed to claim the task');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       {/* Header Section */}
@@ -247,7 +261,7 @@ export default function ComplaintsList() {
                   </td>
                 </tr>
               ) : complaints.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/70 transition-all duration-300 group">
+                <tr key={c.id} className="bg-white hover:bg-emerald-50/20 hover:shadow-[inset_4px_0_0_#008540] transition-colors duration-300 group relative">
                   <td className="px-10 py-8">
                     <span className="font-black text-slate-900 bg-slate-100 px-3 py-1.5 rounded-xl text-[11px] tracking-widest">{c.reference_number}</span>
                   </td>
@@ -306,13 +320,21 @@ export default function ComplaintsList() {
                     </div>
                   </td>
                   <td className="px-10 py-8 text-right">
-                    <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                    <div className="flex items-center justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                       {isAdmin && (
                         <button 
                           onClick={() => { setSelectedComplaint(c); setAssignModalOpen(true); }}
                           className="h-10 w-10 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
                         >
                           <UserPlus className="h-5 w-5" />
+                        </button>
+                      )}
+                      {isStaff && !c.staff_first_name && (
+                        <button 
+                          onClick={() => handleClaim(c.id)}
+                          className="h-10 px-4 flex items-center justify-center bg-emerald-50 text-[#008540] rounded-xl hover:bg-[#008540] hover:text-white transition-all shadow-sm font-black text-[10px] uppercase tracking-widest whitespace-nowrap"
+                        >
+                          Claim Task
                         </button>
                       )}
                       {isStaff ? (
@@ -343,7 +365,7 @@ export default function ComplaintsList() {
           {loading ? (
              Array(3).fill(0).map((_, i) => <CardSkeleton key={i} />)
           ) : complaints.map((c) => (
-             <div key={c.id} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 space-y-6">
+             <div key={c.id} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 space-y-6 hover:border-[#008540] hover:shadow-[0_15px_30px_-10px_rgba(0,133,64,0.15)] hover:-translate-y-1 hover:bg-white transition-all duration-300">
                 <div className="flex justify-between items-start">
                    <span className="font-black text-slate-900 bg-white shadow-sm border border-slate-100 px-3 py-1.5 rounded-xl text-[10px] tracking-widest">{c.reference_number}</span>
                    <div className="flex flex-col items-end gap-2">
@@ -371,6 +393,9 @@ export default function ComplaintsList() {
                    <div className="flex gap-2">
                       {isAdmin && (
                          <button onClick={() => { setSelectedComplaint(c); setAssignModalOpen(true); }} className="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><UserPlus className="h-5 w-5"/></button>
+                      )}
+                      {isStaff && !c.staff_first_name && (
+                         <button onClick={() => handleClaim(c.id)} className="px-4 py-2 bg-emerald-50 text-[#008540] font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-[#008540] hover:text-white transition-colors">Claim</button>
                       )}
                       <Link to={`/dashboard/staff/complaints/${c.id}`} className="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><CheckCircle2 className="h-5 w-5"/></Link>
                    </div>
