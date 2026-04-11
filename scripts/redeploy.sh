@@ -18,6 +18,6 @@ done
 
 # Apply database migration
 echo "📥 Applying Staff Role migration..."
-docker exec -i scms-db mysql -u root -pkiudbpass!23 scms_db < database/migrations/001_add_dept_officer.sql
+docker exec -i scms-db mysql -u kiu_user -pkiupass!123 scms_db < database/migrations/001_add_dept_officer.sql
 
 echo "✅ Deployment Successful!"

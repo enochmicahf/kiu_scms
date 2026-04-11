@@ -51,7 +51,7 @@ services:
     container_name: scms-frontend
     restart: always
     ports:
-      - "80:80"
+      - "8086:80"
     depends_on:
       - backend
     networks:
