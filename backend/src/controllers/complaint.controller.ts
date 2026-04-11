@@ -21,20 +21,21 @@ export const submitComplaint = async (req: Request, res: Response) => {
   try {
     // Get student record
     const [students]: any = await db.query(
-      'SELECT id FROM students WHERE user_id = ?', [userId]
+      'SELECT id, department_id FROM students WHERE user_id = ?', [userId]
     );
     if (students.length === 0) {
       return res.status(403).json({ status: 'error', message: 'Only students can submit complaints' });
     }
     const studentId = students[0].id;
+    const departmentId = students[0].department_id;
 
     const reference = await generateReference();
 
     // Insert complaint
     const [result]: any = await db.query(
-      `INSERT INTO complaints (student_id, category_id, title, description, priority, status, reference_number)
-       VALUES (?, ?, ?, ?, ?, 'Submitted', ?)`,
-      [studentId, categoryId, title, description, priority || 'Medium', reference]
+      `INSERT INTO complaints (student_id, category_id, department_id, title, description, priority, status, reference_number)
+       VALUES (?, ?, ?, ?, ?, ?, 'Submitted', ?)`,
+      [studentId, categoryId, departmentId, title, description, priority || 'Medium', reference]
     );
     const complaintId = result.insertId;
 

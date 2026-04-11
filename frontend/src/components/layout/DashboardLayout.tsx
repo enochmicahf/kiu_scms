@@ -40,8 +40,8 @@ export default function DashboardLayout() {
     { name: 'Audit Logs', href: '/dashboard/admin/logs', icon: ShieldAlert },
     { name: 'Institutional Reports', href: '/dashboard/admin/reports', icon: BarChart3 },
     { name: 'Transparency Board', href: '/dashboard/public-board', icon: BarChart3 },
-  ] : user?.role === 'Staff' ? [
-    { name: 'Staff Dashboard', href: '/dashboard/staff', icon: LayoutDashboard },
+  ] : (user?.role === 'Staff' || user?.role === 'Department Officer') ? [
+    { name: user?.role === 'Department Officer' ? 'Department Dashboard' : 'Staff Dashboard', href: '/dashboard/staff', icon: LayoutDashboard },
     { name: 'Resolution Hub', href: '/dashboard/staff/worklist', icon: ClipboardList },
     { name: 'Transparency Board', href: '/dashboard/public-board', icon: BarChart3 },
   ] : [

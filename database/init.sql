@@ -51,6 +51,7 @@ CREATE TABLE staff (
     user_id INT NOT NULL UNIQUE,
     staff_number VARCHAR(50) NOT NULL UNIQUE,
     department_id INT NOT NULL,
+    role_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (department_id) REFERENCES departments(id)
@@ -67,6 +68,7 @@ CREATE TABLE complaints (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     category_id INT NOT NULL,
+    department_id INT DEFAULT NULL,
     reference_number VARCHAR(20) NOT NULL UNIQUE,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -77,6 +79,7 @@ CREATE TABLE complaints (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES complaint_categories(id),
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_staff_id) REFERENCES staff(id) ON DELETE SET NULL
 );
 
@@ -148,7 +151,7 @@ CREATE TABLE system_settings (
 );
 
 -- Roles Seed Data
-INSERT INTO roles (name) VALUES ('Admin'), ('Staff'), ('Student');
+INSERT INTO roles (name) VALUES ('Admin'), ('Staff'), ('Student'), ('Department Officer');
 
 -- Faculties Seed Data
 INSERT INTO faculties (name) VALUES 

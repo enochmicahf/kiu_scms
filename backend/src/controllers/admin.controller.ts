@@ -16,11 +16,17 @@ export const getAllComplaints = async (req: Request, res: Response) => {
     if (category) { where += ' AND c.category_id = ?'; params.push(category); }
     if (priority) { where += ' AND c.priority = ?'; params.push(priority); }
     
-    // Staff filtering: Only show assigned cases if requested or if specific role limits apply
+    // Staff filtering: Staff only sees assigned. Dept Officer sees department cases (unless specifically checking assigned).
     const { assignedToMe } = req.query as any;
-    if (assignedToMe === 'true') {
+    const roleName = (req as any).user?.roleName;
+    const userId = (req as any).user?.userId;
+
+    if (roleName === 'Staff' || assignedToMe === 'true') {
       where += ' AND c.assigned_staff_id = ?';
-      params.push((req as any).user.userId);
+      params.push(userId);
+    } else if (roleName === 'Department Officer') {
+      where += ' AND c.department_id = (SELECT department_id FROM staff WHERE user_id = ?)';
+      params.push(userId);
     }
 
     if (search) { 
@@ -242,25 +248,22 @@ export const getAdminStats = async (req: Request, res: Response) => {
     let slaQuery = '';
     let params: any[] = [];
 
-    if (isStaff) {
-      statsQuery = 'SELECT COUNT(*) as count FROM complaints WHERE assigned_staff_id = ?';
-      statusQuery = 'SELECT status, COUNT(*) as count FROM complaints WHERE assigned_staff_id = ? GROUP BY status';
-      categoryQuery = `SELECT cc.name as category, COUNT(c.id) as count 
-                       FROM complaint_categories cc 
-                       LEFT JOIN complaints c ON cc.id = c.category_id AND c.assigned_staff_id = ?
-                       GROUP BY cc.name`;
-      slaQuery = `SELECT 
+    if (roleName === 'Staff' || roleName === 'Department Officer') {
+      statsQuery = roleName === 'Staff' ? 'SELECT COUNT(*) as count FROM complaints WHERE assigned_staff_id = ?' : 'SELECT COUNT(*) as count FROM complaints WHERE department_id = (SELECT department_id FROM staff WHERE user_id = ?)';
+      statusQuery = roleName === 'Staff' ? 'SELECT status, COUNT(*) as count FROM complaints WHERE assigned_staff_id = ? GROUP BY status' : 'SELECT status, COUNT(*) as count FROM complaints WHERE department_id = (SELECT department_id FROM staff WHERE user_id = ?) GROUP BY status';
+      categoryQuery = roleName === 'Staff' ? `SELECT cc.name as category, COUNT(c.id) as count FROM complaint_categories cc LEFT JOIN complaints c ON cc.id = c.category_id AND c.assigned_staff_id = ? GROUP BY cc.name` : `SELECT cc.name as category, COUNT(c.id) as count FROM complaint_categories cc LEFT JOIN complaints c ON cc.id = c.category_id AND c.department_id = (SELECT department_id FROM staff WHERE user_id = ?) GROUP BY cc.name`;
+      slaQuery = roleName === 'Staff' ? `SELECT 
                     SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) > CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as breached,
                     SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) <= CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as onTrack
-                  FROM complaints WHERE assigned_staff_id = ?`;
+                  FROM complaints WHERE assigned_staff_id = ?` : `SELECT 
+                    SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) > CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as breached,
+                    SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) <= CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as onTrack
+                  FROM complaints WHERE department_id = (SELECT department_id FROM staff WHERE user_id = ?)`;
       params = [userId];
     } else {
       statsQuery = 'SELECT COUNT(*) as count FROM complaints';
       statusQuery = 'SELECT status, COUNT(*) as count FROM complaints GROUP BY status';
-      categoryQuery = `SELECT cc.name as category, COUNT(c.id) as count 
-                       FROM complaint_categories cc 
-                       LEFT JOIN complaints c ON cc.id = c.category_id 
-                       GROUP BY cc.name`;
+      categoryQuery = `SELECT cc.name as category, COUNT(c.id) as count FROM complaint_categories cc LEFT JOIN complaints c ON cc.id = c.category_id GROUP BY cc.name`;
       slaQuery = `SELECT 
                     SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) > CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as breached,
                     SUM(CASE WHEN status NOT IN ('Resolved', 'Closed', 'Rejected') AND TIMESTAMPDIFF(HOUR, created_at, NOW()) <= CASE priority WHEN 'Critical' THEN 24 WHEN 'High' THEN 48 WHEN 'Medium' THEN 72 WHEN 'Low' THEN 120 ELSE 72 END THEN 1 ELSE 0 END) as onTrack
@@ -273,48 +276,36 @@ export const getAdminStats = async (req: Request, res: Response) => {
     const [slaMetrics]: any = await db.query(slaQuery, params);
     const [users]: any = await db.query('SELECT COUNT(*) as count FROM users');
     
-    // Recent activity (last 5 status changes related to the user if staff)
+    // Recent activity
     let activityQuery = `SELECT csh.*, c.reference_number, u.first_name, u.last_name 
                          FROM complaint_status_history csh
                          JOIN complaints c ON csh.complaint_id = c.id
                          JOIN users u ON csh.changed_by_user_id = u.id `;
     
-    if (isStaff) {
-      activityQuery += 'WHERE c.assigned_staff_id = ? OR csh.changed_by_user_id = ? ';
-    }
+    if (roleName === 'Staff') activityQuery += 'WHERE c.assigned_staff_id = ? OR csh.changed_by_user_id = ? ';
+    else if (roleName === 'Department Officer') activityQuery += 'WHERE c.department_id = (SELECT department_id FROM staff WHERE user_id = ?) OR csh.changed_by_user_id = ? ';
     
     activityQuery += 'ORDER BY csh.changed_at DESC LIMIT 15';
     
-    const [recent]: any = await db.query(activityQuery, isStaff ? [userId, userId] : []);
+    const [recent]: any = await db.query(activityQuery, (roleName === 'Staff' || roleName === 'Department Officer') ? [userId, userId] : []);
 
-    // NEW: Get urgent/overdue cases for staff
     let urgentCases: any[] = [];
-    if (isStaff) {
-      const [rows]: any = await db.query(
-        `SELECT id, reference_number, title, priority, status, created_at 
-         FROM complaints 
-         WHERE assigned_staff_id = ? 
-         AND status NOT IN ('Resolved', 'Closed', 'Rejected')
-         AND (priority IN ('High', 'Critical') OR created_at < DATE_SUB(NOW(), INTERVAL 72 HOUR))
-         ORDER BY priority DESC, created_at ASC LIMIT 5`,
-        [userId]
-      );
+    if (roleName === 'Staff' || roleName === 'Department Officer') {
+      let uQuery = `SELECT id, reference_number, title, priority, status, created_at FROM complaints WHERE status NOT IN ('Resolved', 'Closed', 'Rejected') AND (priority IN ('High', 'Critical') OR created_at < DATE_SUB(NOW(), INTERVAL 72 HOUR))`;
+      if (roleName === 'Staff') uQuery += ' AND assigned_staff_id = ?';
+      if (roleName === 'Department Officer') uQuery += ' AND department_id = (SELECT department_id FROM staff WHERE user_id = ?)';
+      uQuery += ' ORDER BY priority DESC, created_at ASC LIMIT 5';
+      const [rows]: any = await db.query(uQuery, [userId]);
       urgentCases = rows;
     }
 
-    // NEW: Get recent feedback for staff
     let recentFeedback: any[] = [];
-    if (isStaff) {
-      const [fRows]: any = await db.query(
-        `SELECT f.*, c.reference_number, u.first_name, u.last_name, u.email
-         FROM feedback f
-         JOIN complaints c ON f.complaint_id = c.id
-         JOIN students s ON f.student_id = s.id
-         JOIN users u ON s.user_id = u.id
-         WHERE c.assigned_staff_id = ?
-         ORDER BY f.created_at DESC LIMIT 3`,
-        [userId]
-      );
+    if (roleName === 'Staff' || roleName === 'Department Officer') {
+      let fQuery = `SELECT f.*, c.reference_number, u.first_name, u.last_name, u.email FROM feedback f JOIN complaints c ON f.complaint_id = c.id JOIN students s ON f.student_id = s.id JOIN users u ON s.user_id = u.id`;
+      if (roleName === 'Staff') fQuery += ' WHERE c.assigned_staff_id = ?';
+      if (roleName === 'Department Officer') fQuery += ' WHERE c.department_id = (SELECT department_id FROM staff WHERE user_id = ?)';
+      fQuery += ' ORDER BY f.created_at DESC LIMIT 3';
+      const [fRows]: any = await db.query(fQuery, [userId]);
       recentFeedback = fRows;
     }
 

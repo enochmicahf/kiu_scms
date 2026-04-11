@@ -47,6 +47,8 @@ export default function ComplaintsList() {
   const location = useLocation();
   const isAdmin = user?.role === 'Admin';
   const isStaff = user?.role === 'Staff';
+  const isDeptOfficer = user?.role === 'Department Officer';
+  const isStaffView = isStaff || isDeptOfficer;
   const isWorklist = location.pathname.includes('/staff/worklist');
   
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -92,10 +94,10 @@ export default function ComplaintsList() {
   }, [search, status, priority, page, assignedToMe]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin || isDeptOfficer) {
       api.get('/admin/staff').then(res => setStaffList(res.data.data));
     }
-  }, [isAdmin]);
+  }, [isAdmin, isDeptOfficer]);
 
   const handleAssign = async () => {
     if (!selectedComplaint || !targetStaffId) return;
@@ -171,7 +173,7 @@ export default function ComplaintsList() {
               : 'End-to-end audit trail of all institutional grievances logged across Kampala International University.'}
           </p>
         </div>
-        {isStaff && !isWorklist && (
+        {isDeptOfficer && !isWorklist && (
            <button 
              onClick={() => setAssignedToMe(!assignedToMe)}
              className={`group relative px-8 py-4 rounded-3xl text-xs font-black transition-all overflow-hidden ${
@@ -278,8 +280,8 @@ export default function ComplaintsList() {
                   </td>
                   <td className="px-10 py-8 max-w-[280px]">
                     <Link 
-                      to={isStaff ? `/dashboard/staff/complaints/${c.id}` : '#'} 
-                      className={`font-black text-sm text-slate-900 transition-colors leading-snug block truncate group-hover:text-[#008540] ${!isStaff && 'pointer-events-none'}`}
+                      to={isStaffView ? `/dashboard/staff/complaints/${c.id}` : '#'} 
+                      className={`font-black text-sm text-slate-900 transition-colors leading-snug block truncate group-hover:text-[#008540] ${!isStaffView && 'pointer-events-none'}`}
                     >
                       {c.title}
                     </Link>
@@ -321,7 +323,7 @@ export default function ComplaintsList() {
                   </td>
                   <td className="px-10 py-8 text-right">
                     <div className="flex items-center justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                      {isAdmin && (
+                      {(isAdmin || isDeptOfficer) && (
                         <button 
                           onClick={() => { setSelectedComplaint(c); setAssignModalOpen(true); }}
                           className="h-10 w-10 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
@@ -329,15 +331,7 @@ export default function ComplaintsList() {
                           <UserPlus className="h-5 w-5" />
                         </button>
                       )}
-                      {isStaff && !c.staff_first_name && (
-                        <button 
-                          onClick={() => handleClaim(c.id)}
-                          className="h-10 px-4 flex items-center justify-center bg-emerald-50 text-[#008540] rounded-xl hover:bg-[#008540] hover:text-white transition-all shadow-sm font-black text-[10px] uppercase tracking-widest whitespace-nowrap"
-                        >
-                          Claim Task
-                        </button>
-                      )}
-                      {isStaff ? (
+                      {isStaffView ? (
                         <Link 
                           to={`/dashboard/staff/complaints/${c.id}`}
                           className="h-10 w-10 flex items-center justify-center bg-emerald-50 text-[#008540] rounded-xl hover:bg-[#008540] hover:text-white transition-all shadow-sm"
@@ -391,11 +385,8 @@ export default function ComplaintsList() {
                        <p className="text-xs font-bold text-slate-600">{c.student_first_name} {c.student_last_name}</p>
                    </div>
                    <div className="flex gap-2">
-                      {isAdmin && (
+                      {(isAdmin || isDeptOfficer) && (
                          <button onClick={() => { setSelectedComplaint(c); setAssignModalOpen(true); }} className="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><UserPlus className="h-5 w-5"/></button>
-                      )}
-                      {isStaff && !c.staff_first_name && (
-                         <button onClick={() => handleClaim(c.id)} className="px-4 py-2 bg-emerald-50 text-[#008540] font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-[#008540] hover:text-white transition-colors">Claim</button>
                       )}
                       <Link to={`/dashboard/staff/complaints/${c.id}`} className="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><CheckCircle2 className="h-5 w-5"/></Link>
                    </div>

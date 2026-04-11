@@ -57,6 +57,11 @@ interface ComplaintDetail {
 export default function StaffComplaintWorkspace() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'Admin';
+  const isDeptOfficer = user?.role === 'Department Officer';
+  const canAssign = isAdmin || isDeptOfficer;
+
   const [complaint, setComplaint] = useState<ComplaintDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -283,10 +288,10 @@ export default function StaffComplaintWorkspace() {
           {/* Workspace Tabs */}
           <div className="bg-white border-b border-gray-100 px-6 flex items-center gap-8">
              {[
-               { id: 'timeline', label: 'Resolution Timeline', icon: History },
-               { id: 'notes', label: 'Internal Workspace', icon: Lock },
-               { id: 'reassign', label: 'Collaboration', icon: UserPlus },
-             ].map(tab => (
+               { id: 'timeline', label: 'Resolution Timeline', icon: History, show: true },
+               { id: 'notes', label: 'Internal Workspace', icon: Lock, show: true },
+               { id: 'reassign', label: 'Collaboration', icon: UserPlus, show: canAssign },
+             ].filter(t => t.show).map(tab => (
                <button 
                  key={tab.id}
                  onClick={() => setActiveTab(tab.id as any)}
@@ -389,7 +394,7 @@ export default function StaffComplaintWorkspace() {
               </div>
             )}
 
-            {activeTab === 'reassign' && (
+            {activeTab === 'reassign' && canAssign && (
                <div className="max-w-md mx-auto py-12 text-center space-y-8">
                   <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
                      <UserPlus className="h-10 w-10 text-primary-600" />

@@ -36,7 +36,7 @@ export default function Login() {
         
         // Dynamic Role-Based Redirection
         if (user.role === 'Admin') navigate('/dashboard/admin');
-        else if (user.role === 'Staff') navigate('/dashboard/staff');
+        else if (user.role === 'Staff' || user.role === 'Department Officer') navigate('/dashboard/staff');
         else navigate('/dashboard/student');
       }
     } catch (err: any) {

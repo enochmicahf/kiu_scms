@@ -62,12 +62,12 @@ export default function StaffDashboard() {
 
   const kpis = [
     { 
-      label: 'My Total Cases', 
+      label: user?.role === 'Department Officer' ? 'Department Total' : 'My Total Cases', 
       value: stats?.total || 0, 
       icon: FileText, 
       bg: 'bg-emerald-50', 
       color: 'text-emerald-600',
-      description: 'Total grievances assigned to you'
+      description: user?.role === 'Department Officer' ? 'Grand total of grievances in department' : 'Total grievances assigned to you'
     },
     { 
       label: 'Pending Resolution', 
@@ -98,7 +98,7 @@ export default function StaffDashboard() {
             </div>
             <h1 className="text-4xl font-black text-gray-900 tracking-tighter">
               Welcome back,<br />
-              <span className="text-[#008540]">Staff {user?.lastName}</span>
+              <span className="text-[#008540]">{user?.role === 'Department Officer' ? 'Officer' : 'Staff'} {user?.lastName}</span>
             </h1>
           </div>
           <TimeDisplay />
@@ -121,7 +121,7 @@ export default function StaffDashboard() {
         <div className="bg-gradient-to-br from-[#008540] to-[#006b33] p-8 rounded-2xl shadow-lg shadow-emerald-900/10 text-white relative overflow-hidden group">
           <Zap className="absolute -right-4 -bottom-4 h-32 w-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2 opacity-80">Quick Start</p>
-          <h3 className="text-xl font-black mb-6">Staff<br/>Workbench</h3>
+          <h3 className="text-xl font-black mb-6">{user?.role === 'Department Officer' ? 'Supervisor' : 'Staff'}<br/>Workbench</h3>
           <Link 
             to="/dashboard/staff/worklist" 
             className="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg text-xs font-bold transition-all"

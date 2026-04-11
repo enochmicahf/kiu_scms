@@ -43,7 +43,7 @@ function RoleRedirect() {
   }
 
   if (user.role === 'Admin') return <Navigate to="/dashboard/admin" replace />;
-  if (user.role === 'Staff') return <Navigate to="/dashboard/staff" replace />;
+  if (user.role === 'Staff' || user.role === 'Department Officer') return <Navigate to="/dashboard/staff" replace />;
   return <Navigate to="/dashboard/student" replace />;
 }
 
@@ -108,13 +108,13 @@ export default function AppRoutes() {
 
         {/* Staff Specific Routes */}
         <Route path="staff" element={
-          <ProtectedRoute allowedRoles={['Staff']}><StaffDashboard /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Staff', 'Department Officer']}><StaffDashboard /></ProtectedRoute>
         } />
         <Route path="staff/worklist" element={
-          <ProtectedRoute allowedRoles={['Staff']}><ComplaintsList /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Staff', 'Department Officer']}><ComplaintsList /></ProtectedRoute>
         } />
         <Route path="staff/complaints/:id" element={
-          <ProtectedRoute allowedRoles={['Staff']}><StaffComplaintWorkspace /></ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Staff', 'Department Officer']}><StaffComplaintWorkspace /></ProtectedRoute>
         } />
 
       </Route>
