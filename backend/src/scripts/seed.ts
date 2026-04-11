@@ -22,7 +22,7 @@ async function seed() {
 
     // 3. Clear existing demo users
     console.log('🧹 Cleaning old test data...');
-    const testEmails = ['admin@kiu.ac.ug', 'officer@kiu.ac.ug', 'staff@kiu.ac.ug', 'student@kiu.ac.ug'];
+    const testEmails = ['admin@kiu.ac.ug', 'officer@kiu.ac.ug', 'staff@kiu.ac.ug', 'student@kiu.ac.ug', 'enoch@kiu.ac.ug'];
     await db.query('DELETE FROM users WHERE email IN (?)', [testEmails]);
 
     // 4. Create Admin
@@ -43,8 +43,8 @@ async function seed() {
       [offResult.insertId, 'OFF-001', 1, 4]
     );
 
-    // 6. Create Staff
-    console.log('👤 Creating Staff...');
+    // 6. Create Staff (Sarah)
+    console.log('👤 Creating Staff (Sarah)...');
     const [stfResult]: any = await db.query(
       'INSERT INTO users (role_id, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)',
       [2, 'Sarah', 'Staff', 'staff@kiu.ac.ug', passwordHash]
@@ -52,6 +52,18 @@ async function seed() {
     await db.query(
       'INSERT INTO staff (user_id, staff_number, department_id, role_id) VALUES (?, ?, ?, ?)',
       [stfResult.insertId, 'STF-001', 1, 2]
+    );
+
+    // 7. Create Staff (Enoch)
+    console.log('👤 Creating Staff (Enoch)...');
+    const enochPasswordHash = await bcrypt.hash('Enoch@2023', 10);
+    const [enochResult]: any = await db.query(
+      'INSERT INTO users (role_id, first_name, last_name, email, password_hash) VALUES (?, ?, ?, ?, ?)',
+      [2, 'Enoch', 'Staff', 'enoch@kiu.ac.ug', enochPasswordHash]
+    );
+    await db.query(
+      'INSERT INTO staff (user_id, staff_number, department_id, role_id) VALUES (?, ?, ?, ?)',
+      [enochResult.insertId, 'STF-002', 1, 2]
     );
 
     // 7. Create Student
