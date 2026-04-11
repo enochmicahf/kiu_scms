@@ -1,41 +1,30 @@
-version: '3.8'
-
 services:
+  # Database Service
   db:
     image: mysql:8.0
     container_name: scms-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-kiudbpass!23}
       MYSQL_DATABASE: ${DB_NAME:-scms_db}
-      MYSQL_USER: ${DB_USER:-scms_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-scms_password}
-    ports:
-      - "3306:3306"
+      MYSQL_USER: ${DB_USER:-kiu_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-kiupass!123}
     volumes:
       - db_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - scms_network
+      - scms-network
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: scms-phpmyadmin
-    restart: always
-    environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-    ports:
-      - "8080:80"
-    depends_on:
-      - db
-    networks:
-      - scms_network
-
+  # Backend Service
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: scms-backend
     restart: always
     environment:
@@ -43,54 +32,49 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       DB_NAME: ${DB_NAME:-scms_db}
-      DB_USER: ${DB_USER:-scms_user}
-      DB_PASSWORD: ${DB_PASSWORD:-scms_password}
-      JWT_SECRET: ${JWT_SECRET:-supersecretkey}
-    ports:
-      - "5000:5000"
+      DB_USER: ${DB_USER:-kiu_user}
+      DB_PASSWORD: ${DB_PASSWORD:-kiupass!123}
+      JWT_SECRET: ${JWT_SECRET:-PROD_SECURE_TOKEN_REPLACE_ME}
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend/uploads:/app/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
-      - scms_network
+      - scms-network
 
+  # Frontend Service (Nginx Proxy)
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: scms-frontend
     restart: always
-    environment:
-      VITE_API_URL: /api/v1
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "80:80"
     depends_on:
       - backend
     networks:
-      - scms_network
+      - scms-network
 
-  nginx:
-    image: nginx:alpine
-    container_name: scms-nginx
+  # Database Management (Optional, can be commented out for maximum security)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: scms-pma
     restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-kiudbpass!23}
     ports:
-      - "8086:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - "8087:80"
     depends_on:
-      - frontend
-      - backend
+      - db
     networks:
-      - scms_network
+      - scms-network
 
 volumes:
   db_data:
 
 networks:
-  scms_network:
+  scms-network:
     driver: bridge
