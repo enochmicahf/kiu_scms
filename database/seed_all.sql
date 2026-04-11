@@ -3,7 +3,8 @@
 
 USE scms_db;
 
--- 1. Ensure Faculties and Departments exist
+-- 1. Ensure Faculties, Departments, and Roles exist
+INSERT IGNORE INTO roles (name) VALUES ('Admin'), ('Staff'), ('Student'), ('Department Officer');
 INSERT IGNORE INTO faculties (id, name) VALUES (1, 'Faculty of Computing and Informatics');
 INSERT IGNORE INTO departments (id, faculty_id, name) VALUES (1, 1, 'Computer Science');
 
