@@ -12,6 +12,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src ./src
 # Ensure uploads directory exists
 RUN mkdir -p uploads
 
